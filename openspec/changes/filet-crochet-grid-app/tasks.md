@@ -1,11 +1,11 @@
 ## 1. Project Foundation
 
-- [ ] 1.1 Update `openspec/config.yaml` with project context (tech stack, conventions, domain)
-- [ ] 1.2 Create `src/environments/environment.ts` and `src/environments/environment.prod.ts` with `apiBaseUrl` constant
-- [ ] 1.3 Configure `HttpClient` with `provideHttpClient(withFetch(), withInterceptors([authInterceptor]))` in `app.config.ts`
-- [ ] 1.4 Configure `provideRouter` with lazy routes and `withComponentInputBinding()` in `app.config.ts`
-- [ ] 1.5 Strip the default Angular placeholder from `app.html` and `app.css`; replace with bare `<router-outlet>`
-- [ ] 1.6 Add global base styles (box-sizing, body margin reset, full-height layout) to `styles.css`
+- [x] 1.1 Update `openspec/config.yaml` with project context (tech stack, conventions, domain)
+- [x] 1.2 Create `src/environments/environment.ts` and `src/environments/environment.prod.ts` with `apiBaseUrl` constant
+- [x] 1.3 Configure `HttpClient` with `provideHttpClient(withFetch(), withInterceptors([authInterceptor]))` in `app.config.ts`
+- [x] 1.4 Configure `provideRouter` with lazy routes and `withComponentInputBinding()` in `app.config.ts`
+- [x] 1.5 Strip the default Angular placeholder from `app.html` and `app.css`; replace with bare `<router-outlet>`
+- [x] 1.6 Add global base styles (box-sizing, body margin reset, full-height layout) to `styles.css`
 
 ## 2. Auth — `AuthService` and Guard
 

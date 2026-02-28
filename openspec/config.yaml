@@ -1,20 +1,31 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Tech stack: TypeScript (strict), Angular v21 (standalone components, no NgModules),
+  Tailwind CSS v4, RxJS ~7.8, Vitest for unit tests.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  Angular conventions:
+  - Standalone components only; do NOT set standalone: true (it is the default in v20+)
+  - Use signals (signal, computed, effect) for all state
+  - Use input() and output() functions, never @Input/@Output decorators
+  - ChangeDetectionStrategy.OnPush on every component
+  - inject() for dependency injection, never constructor injection
+  - Native control flow (@if, @for, @switch) — never *ngIf/*ngFor
+  - No ngClass / ngStyle — use class and style bindings
+  - Lazy-loaded feature routes
+  - Functional guards (CanActivateFn, CanDeactivateFn) and interceptors
+
+  Domain: Filet crochet pattern designer.
+  Users design grid patterns (200+ rows/cols) by toggling cells on a canvas.
+  Grid state is a sparse Set<string> of "row,col" keys for filled cells.
+  Patterns are saved to a REST backend API (PATCH full state, debounced 2 s).
+
+  File conventions:
+  - Core (services, guards, interceptors, models): src/app/core/
+  - Feature components: src/app/features/<feature>/
+  - Editor sub-components: src/app/features/editor/components/
+
+rules:
+  tasks:
+    - Keep each task scoped to one file or one clearly bounded concern
+    - Always mark checkbox immediately after completing the task
