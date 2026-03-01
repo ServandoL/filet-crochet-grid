@@ -18,7 +18,7 @@ export class GridColHeadersComponent {
   readonly ROW_HEADER_WIDTH = 40;
 
   readonly colIndices = computed(() => Array.from({ length: this.cols() }, (_, i) => i));
-  readonly buttonSize = computed(() => this.progressMode() ? Math.max(this.cellSize(), 44) : this.cellSize());
+  readonly buttonSize = computed(() => this.cellSize());
 
   onColClick(col: number): void {
     if (!this.readonly()) this.colClicked.emit(col);
