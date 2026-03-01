@@ -1,8 +1,10 @@
 import {Collection, Db, type Document, MongoClient, type WithId} from 'mongodb';
 import {log} from './logger.js';
 import {toError} from './utils.js';
+import type {DbPattern} from './types.js';
 
 export class MongoDatabase {
+  private readonly $Patterns = 'PATTERNS';
   private static _instance: MongoDatabase;
   private readonly _client: MongoClient;
   private readonly _db: Db;
@@ -19,10 +21,12 @@ export class MongoDatabase {
   public static async initialize() {
     const url = process.env['MONGO_URL'] || 'mongodb://localhost:27017';
     const dbName = process.env['MONGO_DB_NAME'] || 'test';
-    const client = new MongoClient(url);
+    const client = new MongoClient(url, {
+      monitorCommands: true
+    });
     client.on('error', err => {
       const error = toError(err);
-      log.info(error)
+      log.warn(error)
     }).on('connectionReady', event => {
       log.info(event)
     }).on('commandSucceeded', event => {
@@ -32,6 +36,10 @@ export class MongoDatabase {
     });
     MongoDatabase._instance = new MongoDatabase(client, dbName);
     await MongoDatabase._instance._client.connect();
+  }
+
+  public get patterns(): Collection<DbPattern> {
+    return this._db.collection<DbPattern>(this.$Patterns)
   }
 
   public collection<T extends WithId<Document> = WithId<Document>>(name: string): Collection<T> {

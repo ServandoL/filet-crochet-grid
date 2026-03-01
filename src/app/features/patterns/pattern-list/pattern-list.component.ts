@@ -1,9 +1,12 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { Title } from '@angular/platform-browser';
-import { PatternApiService } from '../../../core/services/pattern-api.service';
-import { PatternCardComponent } from '../pattern-card/pattern-card.component';
-import { Pattern } from '../../../core/models/pattern.model';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {Router} from '@angular/router';
+import {Title} from '@angular/platform-browser';
+import {PatternApiService} from '../../../core/services/pattern-api.service';
+import {PatternCardComponent} from '../pattern-card/pattern-card.component';
+import {Pattern} from '../../../core/models/pattern.model';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {tap} from 'rxjs/operators';
+import {catchError, EMPTY} from 'rxjs';
 
 @Component({
   selector: 'app-pattern-list',
@@ -46,7 +49,7 @@ import { Pattern } from '../../../core/models/pattern.model';
           </div>
         } @else {
           <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" role="list">
-            @for (pattern of patterns(); track pattern.id) {
+            @for (pattern of patterns(); track pattern._id) {
               <li>
                 <app-pattern-card
                   [pattern]="pattern"
@@ -64,22 +67,26 @@ export class PatternListComponent implements OnInit {
   private readonly api = inject(PatternApiService);
   protected readonly router = inject(Router);
   private readonly titleService = inject(Title);
+  private readonly destroy = inject(DestroyRef);
 
   readonly patterns = signal<Pattern[]>([]);
   readonly loading = signal(true);
 
   ngOnInit(): void {
     this.titleService.setTitle('My Patterns — Filet Crochet Grid');
-    this.api.getPatterns().subscribe({
-      next: (list) => {
+    this.api.getPatterns().pipe(takeUntilDestroyed(this.destroy),
+      tap(list => {
         this.patterns.set(list);
         this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
+      }),
+      catchError(() => {
+        this.loading.set(false);
+        return EMPTY
+      })
+    ).subscribe();
   }
 
   onDeleted(id: string): void {
-    this.patterns.update((list) => list.filter((p) => p.id !== id));
+    this.patterns.update((list) => list.filter((p) => p._id !== id));
   }
 }

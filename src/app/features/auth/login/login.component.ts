@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { inject } from '@angular/core';
-import { Title } from '@angular/platform-browser';
-import { AuthService } from '../../../core/services/auth.service';
+import {ChangeDetectionStrategy, Component, inject, OnInit, signal} from '@angular/core';
+import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Router} from '@angular/router';
+import {Title} from '@angular/platform-browser';
+import {AuthService} from '../../../core/services/auth.service';
+import {catchError, EMPTY, first} from 'rxjs';
+import {tap} from 'rxjs/operators';
 
 @Component({
   selector: 'app-login',
@@ -33,8 +34,11 @@ import { AuthService } from '../../../core/services/auth.service';
             />
             @if (emailInvalid()) {
               <p id="email-error" class="text-xs text-red-600" role="alert">
-                @if (email.hasError('required')) { Email is required. }
-                @else if (email.hasError('email')) { Enter a valid email address. }
+                @if (email.hasError('required')) {
+                  Email is required.
+                } @else if (email.hasError('email')) {
+                  Enter a valid email address.
+                }
               </p>
             }
           </div>
@@ -116,6 +120,7 @@ export class LoginComponent implements OnInit {
   }
 
   private readonly _submitted = signal(false);
+
   submitted() {
     return this._submitted();
   }
@@ -127,15 +132,15 @@ export class LoginComponent implements OnInit {
     if (this.form.invalid) return;
 
     this.loading.set(true);
-    const { email, password } = this.form.getRawValue();
+    const {email, password} = this.form.getRawValue();
 
-    this.auth.login(email, password).subscribe({
-      next: () => this.router.navigate(['/patterns']),
-      error: (err) => {
-        this.loading.set(false);
-        this.apiError.set(err?.error?.message ?? 'Invalid email or password.');
-      },
-    });
+    this.auth.login(email, password).pipe(first(), tap(() => void this.router.navigate(['/patterns'])), catchError(error => {
+      this.loading.set(false);
+      this.apiError.set(error?.message ?? 'Invalid email or password.');
+      return EMPTY;
+    })).subscribe()
+
+    ;
   }
 }
 

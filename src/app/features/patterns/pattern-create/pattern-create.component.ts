@@ -1,12 +1,14 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { PatternApiService } from '../../../core/services/pattern-api.service';
+import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {AbstractControl, FormBuilder, ReactiveFormsModule, ValidatorFn, Validators} from '@angular/forms';
+import {Router} from '@angular/router';
+import {PatternApiService} from '../../../core/services/pattern-api.service';
+import {catchError, first, of} from 'rxjs';
+import {tap} from 'rxjs/operators';
 
 const integerValidator: ValidatorFn = (control: AbstractControl) => {
   const val = control.value;
   if (val === null || val === '') return null;
-  return Number.isInteger(Number(val)) ? null : { integer: true };
+  return Number.isInteger(Number(val)) ? null : {integer: true};
 };
 
 @Component({
@@ -56,8 +58,11 @@ const integerValidator: ValidatorFn = (control: AbstractControl) => {
               />
               @if (fieldInvalid('rows')) {
                 <p id="rows-error" class="text-xs text-red-600" role="alert">
-                  @if (form.controls.rows.hasError('required')) { Required. }
-                  @else { Must be a positive whole number. }
+                  @if (form.controls.rows.hasError('required')) {
+                    Required.
+                  } @else {
+                    Must be a positive whole number.
+                  }
                 </p>
               }
             </div>
@@ -77,8 +82,11 @@ const integerValidator: ValidatorFn = (control: AbstractControl) => {
               />
               @if (fieldInvalid('cols')) {
                 <p id="cols-error" class="text-xs text-red-600" role="alert">
-                  @if (form.controls.cols.hasError('required')) { Required. }
-                  @else { Must be a positive whole number. }
+                  @if (form.controls.cols.hasError('required')) {
+                    Required.
+                  } @else {
+                    Must be a positive whole number.
+                  }
                 </p>
               }
             </div>
@@ -140,20 +148,18 @@ export class PatternCreateComponent {
     if (this.form.invalid) return;
 
     this.loading.set(true);
-    const { name, rows, cols } = this.form.getRawValue();
+    const {name, rows, cols} = this.form.getRawValue();
 
-    this.api.createPattern({ name, rows: Number(rows), cols: Number(cols) }).subscribe({
-      next: (pattern) =>
-        this.router.navigate(['/patterns', pattern.id], { queryParams: { mode: 'edit' } }),
-      error: (err) => {
-        this.loading.set(false);
-        this.apiError.set(err?.error?.message ?? 'Could not create pattern. Try again.');
-      },
-    });
+    this.api.createPattern({name, rows: Number(rows), cols: Number(cols)}).pipe(first(), tap(pattern =>
+      void this.router.navigate(['/patterns', pattern._id], {queryParams: {mode: 'edit'}})), catchError(err => {
+      this.loading.set(false);
+      this.apiError.set(err?.error?.message ?? 'Could not create pattern. Try again.');
+      return of(undefined);
+    })).subscribe();
   }
 
   onCancel(): void {
-    this.router.navigate(['/patterns']);
+    void this.router.navigate(['/patterns']);
   }
 }
 

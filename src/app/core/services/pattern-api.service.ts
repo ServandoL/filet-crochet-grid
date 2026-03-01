@@ -1,13 +1,9 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
-import {
-  CreatePatternDto,
-  Pattern,
-  UpdatePatternDto,
-} from '../models/pattern.model';
+import {inject, Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {environment} from '../../../environments/environment';
+import {CreatePatternDto, Pattern, UpdatePatternDto,} from '../models/pattern.model';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class PatternApiService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBaseUrl}/patterns`;
@@ -21,7 +17,16 @@ export class PatternApiService {
   }
 
   createPattern(dto: CreatePatternDto) {
-    return this.http.post<Pattern>(this.base, dto);
+    const time = new Date().toISOString();
+    const pattern = {
+      cells: [],
+      cols: dto.cols,
+      createdAt: time,
+      name: dto.name,
+      rows: dto.rows,
+      updatedAt: time
+    }
+    return this.http.post<Pattern>(this.base, pattern);
   }
 
   updatePattern(id: string, dto: UpdatePatternDto) {

@@ -1,5 +1,5 @@
 export interface GridState {
-  patternId: string;
+  _id: string;
   name: string;
   rows: number;
   cols: number;

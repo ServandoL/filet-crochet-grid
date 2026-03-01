@@ -1,7 +1,7 @@
 export type FilledCell = [number, number];
 
 export interface Pattern {
-  id: string;
+  _id: string;
   name: string;
   rows: number;
   cols: number;

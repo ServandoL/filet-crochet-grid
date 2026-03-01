@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { Pattern } from '../../../core/models/pattern.model';
-import { PatternApiService } from '../../../core/services/pattern-api.service';
+import {ChangeDetectionStrategy, Component, inject, input, output, signal} from '@angular/core';
+import {Router} from '@angular/router';
+import {Pattern} from '../../../core/models/pattern.model';
+import {PatternApiService} from '../../../core/services/pattern-api.service';
+import {catchError, EMPTY, first} from 'rxjs';
+import {tap} from 'rxjs/operators';
 
 @Component({
   selector: 'app-pattern-card',
@@ -62,11 +64,11 @@ import { PatternApiService } from '../../../core/services/pattern-api.service';
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
         role="dialog"
         aria-modal="true"
-        [attr.aria-labelledby]="'dialog-title-' + pattern().id"
+        [attr.aria-labelledby]="'dialog-title-' + pattern()._id"
       >
         <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4">
           <h3
-            [id]="'dialog-title-' + pattern().id"
+            [id]="'dialog-title-' + pattern()._id"
             class="text-base font-semibold text-gray-900 mb-2"
           >
             Delete "{{ pattern().name }}"?
@@ -109,32 +111,30 @@ export class PatternCardComponent {
   readonly deleteError = signal<string | null>(null);
 
   lastEdited() {
-    return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(
+    return new Intl.DateTimeFormat('en-US', {dateStyle: 'medium'}).format(
       new Date(this.pattern().updatedAt),
     );
   }
 
   onEdit() {
-    this.router.navigate(['/patterns', this.pattern().id], { queryParams: { mode: 'edit' } });
+    void this.router.navigate(['/patterns', this.pattern()._id], {queryParams: {mode: 'edit'}});
   }
 
   onView() {
-    this.router.navigate(['/patterns', this.pattern().id], { queryParams: { mode: 'view' } });
+    void this.router.navigate(['/patterns', this.pattern()._id], {queryParams: {mode: 'view'}});
   }
 
   onDeleteConfirmed() {
     this.deleting.set(true);
     this.deleteError.set(null);
-    this.api.deletePattern(this.pattern().id).subscribe({
-      next: () => {
-        this.confirmingDelete.set(false);
-        this.deleted.emit(this.pattern().id);
-      },
-      error: (err) => {
-        this.deleting.set(false);
-        this.deleteError.set(err?.error?.message ?? 'Could not delete. Try again.');
-      },
-    });
+    this.api.deletePattern(this.pattern()._id).pipe(first(), tap(() => {
+      this.confirmingDelete.set(false);
+      this.deleted.emit(this.pattern()._id);
+    }), catchError(err => {
+      this.deleting.set(false);
+      this.deleteError.set(err?.error?.message ?? 'Could not delete. Try again.');
+      return EMPTY;
+    })).subscribe();
   }
 }
 

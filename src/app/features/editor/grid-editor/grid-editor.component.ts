@@ -1,24 +1,27 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
-  OnInit,
   computed,
+  DestroyRef,
+  ElementRef,
   inject,
   input,
+  OnInit,
   signal,
   viewChild,
 } from '@angular/core';
-import { Router } from '@angular/router';
-import { Title } from '@angular/platform-browser';
-import { PatternApiService } from '../../../core/services/pattern-api.service';
-import { PatternSaveService } from '../services/pattern-save.service';
-import { GridCanvasComponent, CellPosition } from '../components/grid-canvas/grid-canvas.component';
-import { GridRowHeadersComponent } from '../components/grid-row-headers/grid-row-headers.component';
-import { GridColHeadersComponent } from '../components/grid-col-headers/grid-col-headers.component';
-import { GridState } from '../models/grid-state.model';
-import { arrayToFilledSet } from '../../../core/models/pattern.model';
-import { toggleCell, fillRow, fillCol } from '../utils/grid.utils';
+import {Router} from '@angular/router';
+import {Title} from '@angular/platform-browser';
+import {PatternApiService} from '../../../core/services/pattern-api.service';
+import {PatternSaveService} from '../services/pattern-save.service';
+import {CellPosition, GridCanvasComponent} from '../components/grid-canvas/grid-canvas.component';
+import {GridRowHeadersComponent} from '../components/grid-row-headers/grid-row-headers.component';
+import {GridColHeadersComponent} from '../components/grid-col-headers/grid-col-headers.component';
+import {GridState} from '../models/grid-state.model';
+import {arrayToFilledSet} from '../../../core/models/pattern.model';
+import {fillCol, fillRow, toggleCell} from '../utils/grid.utils';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {catchError, of} from 'rxjs';
 
 const DEFAULT_CELL_SIZE = 24;
 
@@ -65,8 +68,12 @@ const DEFAULT_CELL_SIZE = 24;
 
         <!-- Save status aria-live region -->
         <div aria-live="polite" aria-atomic="true" class="sr-only">
-          @if (saveService.saveStatus() === 'saved') { Saved. }
-          @if (saveService.saveStatus() === 'error') { Save failed. }
+          @if (saveService.saveStatus() === 'saved') {
+            Saved.
+          }
+          @if (saveService.saveStatus() === 'error') {
+            Save failed.
+          }
         </div>
 
         <!-- Save status visual indicator -->
@@ -155,6 +162,7 @@ export class GridEditorComponent implements OnInit {
   protected readonly saveService = inject(PatternSaveService);
   private readonly router = inject(Router);
   private readonly titleService = inject(Title);
+  private readonly destroy = inject(DestroyRef);
 
   readonly scrollContainer = viewChild<ElementRef<HTMLDivElement>>('scrollContainer');
 
@@ -170,55 +178,57 @@ export class GridEditorComponent implements OnInit {
     this.saveService.isDirty.set(false);
     this.saveService.saveStatus.set('idle');
 
-    this.api.getPattern(this.id()).subscribe({
-      next: (pattern) => {
-        const state: GridState = {
-          patternId: pattern.id,
-          name: pattern.name,
-          rows: pattern.rows,
-          cols: pattern.cols,
-          filledCells: arrayToFilledSet(pattern.cells),
-        };
-        this.gridState.set(state);
-        this.loading.set(false);
-        this.titleService.setTitle(`${pattern.name} — Filet Crochet Grid`);
-      },
-      error: () => {
-        this.loading.set(false);
-        this.router.navigate(['/patterns']);
-      },
-    });
+    this.api.getPattern(this.id()).pipe(takeUntilDestroyed(this.destroy), catchError(() => {
+      this.loading.set(false);
+      return of(undefined);
+    })).subscribe((pattern) => {
+        if (pattern) {
+          const state: GridState = {
+            _id: pattern._id,
+            name: pattern.name,
+            rows: pattern.rows,
+            cols: pattern.cols,
+            filledCells: arrayToFilledSet(pattern.cells),
+          };
+          this.gridState.set(state);
+          this.loading.set(false);
+          this.titleService.setTitle(`${pattern.name} — Filet Crochet Grid`);
+        } else {
+          void this.router.navigate(['/patterns'])
+        }
+      }
+    );
   }
 
   onCellToggled(pos: CellPosition): void {
     const state = this.gridState();
     if (!state) return;
     const newCells = toggleCell(state.filledCells, pos.row, pos.col);
-    this.gridState.set({ ...state, filledCells: newCells });
-    this.saveService.scheduleAutoSave({ ...state, filledCells: newCells });
+    this.gridState.set({...state, filledCells: newCells});
+    this.saveService.scheduleAutoSave({...state, filledCells: newCells});
   }
 
   onRowClicked(row: number): void {
     const state = this.gridState();
     if (!state) return;
     const newCells = fillRow(state.filledCells, row, state.cols);
-    this.gridState.set({ ...state, filledCells: newCells });
-    this.saveService.scheduleAutoSave({ ...state, filledCells: newCells });
+    this.gridState.set({...state, filledCells: newCells});
+    this.saveService.scheduleAutoSave({...state, filledCells: newCells});
   }
 
   onColClicked(col: number): void {
     const state = this.gridState();
     if (!state) return;
     const newCells = fillCol(state.filledCells, col, state.rows);
-    this.gridState.set({ ...state, filledCells: newCells });
-    this.saveService.scheduleAutoSave({ ...state, filledCells: newCells });
+    this.gridState.set({...state, filledCells: newCells});
+    this.saveService.scheduleAutoSave({...state, filledCells: newCells});
   }
 
   onNameChange(event: Event): void {
     const state = this.gridState();
     if (!state) return;
     const name = (event.target as HTMLInputElement).value;
-    const newState = { ...state, name };
+    const newState = {...state, name};
     this.gridState.set(newState);
     this.saveService.scheduleAutoSave(newState);
   }
@@ -229,7 +239,7 @@ export class GridEditorComponent implements OnInit {
   }
 
   onBack(): void {
-    this.router.navigate(['/patterns']);
+    void this.router.navigate(['/patterns']);
   }
 
   onZoomChange(event: Event): void {
