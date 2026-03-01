@@ -7,7 +7,7 @@ export const loginRedirectGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  if (auth.isAuthenticated() || !environment.production) {
+  if (auth.isAuthenticated() || !environment.enableLogIn) {
     return router.createUrlTree(['/patterns']);
   }
 

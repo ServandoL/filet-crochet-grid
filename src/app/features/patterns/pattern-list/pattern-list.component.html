@@ -12,16 +12,18 @@
       >
         + New Pattern
       </button>
-      <button
-        type="button"
-        (click)="onLogout()"
-        class="rounded-lg border border-gray-300 text-gray-600 px-4 py-2 text-sm font-medium
+      @if (env.enableLogIn) {
+        <button
+          type="button"
+          (click)="onLogout()"
+          class="rounded-lg border border-gray-300 text-gray-600 px-4 py-2 text-sm font-medium
                hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400
                focus:ring-offset-2 transition"
-        aria-label="Log out"
-      >
-        Log Out
-      </button>
+          aria-label="Log out"
+        >
+          Log Out
+        </button>
+      }
     </div>
   </header>
 

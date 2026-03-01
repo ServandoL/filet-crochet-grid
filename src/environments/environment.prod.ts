@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
-  apiBaseUrl: '/api',
+  apiBaseUrl: 'http://localhost:9000/api',
+  enableLogIn: false
 };
 

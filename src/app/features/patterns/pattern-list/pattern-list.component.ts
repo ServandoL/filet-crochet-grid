@@ -8,6 +8,7 @@ import {toSignal} from '@angular/core/rxjs-interop';
 import {catchError, of, startWith} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {AuthService} from '../../../core/services/auth.service';
+import {environment} from '../../../../environments/environment';
 
 @Component({
   selector: 'app-pattern-list',
@@ -20,6 +21,7 @@ export class PatternListComponent implements OnInit {
   protected readonly router = inject(Router);
   private readonly titleService = inject(Title);
   private readonly auth = inject(AuthService);
+  public env = environment;
 
   // Stream emits null while loading, then the pattern array (or [] on error).
   private readonly patterns$ = this.api.getPatterns().pipe(
