@@ -24,30 +24,31 @@ describe('GridCanvasComponent', () => {
     fixture.detectChanges();
 
     // GridCanvasComponent uses afterNextRender to setup listeners.
-    // In unit tests, we may need to trigger this manually or mock it.
-    // Since it's private and uses afterNextRender, we call the setup method directly.
-    (component as any).setupTouchListeners();
+    // afterNextRender might run automatically in TestBed during detectChanges() in some versions,
+    // but if not, we may need to trigger it.
   });
 
-  function createTouchEvent(type: string, touches: Partial<Touch>[]): TouchEvent {
+  function createTouchEvent(type: string, options: { touches?: Partial<Touch>[], changedTouches?: Partial<Touch>[] }): TouchEvent {
     const event = new TouchEvent(type, {
       bubbles: true,
       cancelable: true
     });
-    Object.defineProperty(event, 'touches', { value: touches });
-    Object.defineProperty(event, 'changedTouches', { value: touches });
+    const touches = options.touches || [];
+    const changedTouches = options.changedTouches || touches;
+
+    Object.defineProperty(event, 'touches', { value: touches, configurable: true });
+    Object.defineProperty(event, 'changedTouches', { value: changedTouches, configurable: true });
     return event;
   }
 
   it('should call e.preventDefault() on touchend when displacement is less than 8px (tap)', () => {
-    const touchStart = createTouchEvent('touchstart', [{ clientX: 10, clientY: 10 }] as any);
+    const touchStart = createTouchEvent('touchstart', { touches: [{ clientX: 10, clientY: 10 }] as any });
     el.dispatchEvent(touchStart);
 
-    const touchEnd = createTouchEvent('touchend', [] as any);
-    Object.defineProperty(touchEnd, 'changedTouches', {
-      value: [{ clientX: 12, clientY: 12 }] // displacement = sqrt(4+4) = 2.82 < 8
+    const touchEnd = createTouchEvent('touchend', {
+      touches: [],
+      changedTouches: [{ clientX: 12, clientY: 12 }] as any
     });
-    Object.defineProperty(touchEnd, 'touches', { value: [] });
 
     const preventDefaultSpy = vi.spyOn(touchEnd, 'preventDefault');
     el.dispatchEvent(touchEnd);
@@ -56,14 +57,13 @@ describe('GridCanvasComponent', () => {
   });
 
   it('should NOT call e.preventDefault() on touchend when displacement is 8px or more (drag)', () => {
-    const touchStart = createTouchEvent('touchstart', [{ clientX: 10, clientY: 10 }] as any);
+    const touchStart = createTouchEvent('touchstart', { touches: [{ clientX: 10, clientY: 10 }] as any });
     el.dispatchEvent(touchStart);
 
-    const touchEnd = createTouchEvent('touchend', [] as any);
-    Object.defineProperty(touchEnd, 'changedTouches', {
-      value: [{ clientX: 20, clientY: 20 }] // displacement = sqrt(100+100) = 14.14 >= 8
+    const touchEnd = createTouchEvent('touchend', {
+      touches: [],
+      changedTouches: [{ clientX: 20, clientY: 20 }] as any
     });
-    Object.defineProperty(touchEnd, 'touches', { value: [] });
 
     const preventDefaultSpy = vi.spyOn(touchEnd, 'preventDefault');
     el.dispatchEvent(touchEnd);
@@ -84,20 +84,19 @@ describe('GridCanvasComponent', () => {
     } as DOMRect);
 
     // 1. Simulate Touch Start
-    const touchStart = createTouchEvent('touchstart', [{ clientX: 10, clientY: 10 }] as any);
+    const touchStart = createTouchEvent('touchstart', { touches: [{ clientX: 10, clientY: 10 }] as any });
     el.dispatchEvent(touchStart);
 
     // 2. Simulate Touch End (Tap)
-    const touchEnd = createTouchEvent('touchend', [] as any);
-    Object.defineProperty(touchEnd, 'changedTouches', {
-      value: [{ clientX: 10, clientY: 10 }]
+    const touchEnd = createTouchEvent('touchend', {
+      touches: [],
+      changedTouches: [{ clientX: 10, clientY: 10 }] as any
     });
-    Object.defineProperty(touchEnd, 'touches', { value: [] });
 
     el.dispatchEvent(touchEnd);
+    expect(touchEnd.defaultPrevented).toBe(true);
 
     // 3. Simulate subsequent click event if not prevented
-    // This models the browser's behavior: it only fires click if touchend was NOT prevented.
     if (!touchEnd.defaultPrevented) {
       const clickEvent = new MouseEvent('click', { bubbles: true });
       canvas.dispatchEvent(clickEvent);
