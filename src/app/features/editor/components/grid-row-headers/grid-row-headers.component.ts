@@ -5,8 +5,6 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex flex-col" [style.width.px]="HEADER_WIDTH">
-      <!-- Top-left corner spacer — matches the col-header height -->
-      <div [style.height.px]="HEADER_WIDTH" class="shrink-0"></div>
 
       @for (row of rowIndices(); track row) {
         <button
