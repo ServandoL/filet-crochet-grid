@@ -1,6 +1,6 @@
 ## 1. Fix
 
-- [ ] 1.1 In `GridCanvasComponent.onTouchEnd()`, add `e.preventDefault()` inside the `dist < 8` tap branch to suppress the browser's synthetic `click` event
+- [x] 1.1 In `GridCanvasComponent.onTouchEnd()`, add `e.preventDefault()` inside the `dist < 8` tap branch to suppress the browser's synthetic `click` event
 
 ## 2. Tests
 

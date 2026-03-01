@@ -212,6 +212,11 @@ export class GridCanvasComponent implements OnDestroy {
       const dy = e.changedTouches[0].clientY - this.touchStartY();
       const dist = Math.sqrt(dx * dx + dy * dy);
       if (dist < 8) {
+        // Suppress the browser's synthetic click event that fires after touchend.
+        // Without this, mobile browsers fire both touchend (handled here) AND a
+        // click event (handled by the (click) binding), causing the cell to toggle
+        // twice — filling it then immediately unfilling it — per single tap.
+        e.preventDefault();
         // It's a tap — hit-test against canvas
         const canvas = this.canvasRef().nativeElement;
         const rect = canvas.getBoundingClientRect();
