@@ -91,14 +91,14 @@
 - [x] 11.1 Generate `src/app/features/editor/components/grid-row-headers/grid-row-headers.component.ts` — standalone, `OnPush`; `input()` for `rows`, `cellSize`, `readonly`; `output()` for `rowClicked` (emits row index)
 - [x] 11.2 Render row numbers 1–N as `<button>` elements using `@for`; each button height matches `cellSize`
 - [x] 11.3 Emit `rowClicked` on button click when `!readonly`; disable buttons and add `aria-disabled` in view mode
-- [x] 11.4 Sync vertical scroll position with canvas container via scroll event binding
+- [x] 11.4 Sync vertical scroll position with canvas container via scroll event binding — **implemented via CSS `position: sticky` inside shared `overflow-auto` scroll container; JS scroll-event wiring is not required (see design.md Decision #1)**
 
 ## 12. Grid Col Headers — `GridColHeadersComponent`
 
 - [x] 12.1 Generate `src/app/features/editor/components/grid-col-headers/grid-col-headers.component.ts` — standalone, `OnPush`; `input()` for `cols`, `cellSize`, `readonly`; `output()` for `colClicked` (emits col index)
 - [x] 12.2 Render column numbers 1–N as `<button>` elements using `@for`; each button width matches `cellSize`
 - [x] 12.3 Emit `colClicked` on button click when `!readonly`; disable buttons and add `aria-disabled` in view mode
-- [x] 12.4 Sync horizontal scroll position with canvas container via scroll event binding
+- [x] 12.4 Sync horizontal scroll position with canvas container via scroll event binding — **implemented via CSS `position: sticky` inside shared `overflow-auto` scroll container; JS scroll-event wiring is not required (see design.md Decision #1)**
 
 ## 13. Grid Editor — `GridEditorComponent`
 
@@ -130,7 +130,7 @@
 - [x] 15.3 Ensure the delete confirmation dialog traps focus and returns focus to the Delete button on close
 - [x] 15.4 Add `aria-live="polite"` region for save status feedback ("Saved ✓", "Save failed ⚠")
 - [x] 15.5 Add `<title>` updates per route (login, pattern list, editor) using Angular `Title` service
-- [ ] 15.6 Run axe-core audit against all three main views and fix any reported violations
+- [x] 15.6 Run axe-core audit against all three main views and fix any reported violations
 
 ## 16. Integration and Final Wiring
 

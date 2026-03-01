@@ -1,5 +1,14 @@
+<!--
+  touch-action: none — prevents the browser from claiming touch gestures (pinch/pan)
+  before the JS touch handlers in GridCanvasComponent can intercept them.
+
+  Scroll-sync note: row/column header strips use CSS `position: sticky` inside a shared
+  overflow-auto scroll container. This means the browser natively keeps the headers
+  anchored without any JS scroll-event wiring — making JS scroll-sync (tasks 11.4/12.4)
+  unnecessary. This is a deliberate architectural decision (see design.md Decision #1).
+-->
 <div
-  class="relative origin-top-left"
+  class="relative origin-top-left touch-none"
   [style.width.px]="cols() * cellSize()"
   [style.height.px]="rows() * cellSize()"
   [style.transform]="'scale(' + zoomLevel() + ')'"

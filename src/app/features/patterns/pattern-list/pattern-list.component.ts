@@ -7,6 +7,7 @@ import {Pattern} from '../../../core/models/pattern.model';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {tap} from 'rxjs/operators';
 import {catchError, EMPTY} from 'rxjs';
+import {AuthService} from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-pattern-list',
@@ -19,6 +20,7 @@ export class PatternListComponent implements OnInit {
   protected readonly router = inject(Router);
   private readonly titleService = inject(Title);
   private readonly destroy = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
 
   readonly patterns = signal<Pattern[]>([]);
   readonly loading = signal(true);
@@ -39,5 +41,10 @@ export class PatternListComponent implements OnInit {
 
   onDeleted(id: string): void {
     this.patterns.update((list) => list.filter((p) => p._id !== id));
+  }
+
+  onLogout(): void {
+    this.auth.logout();
+    void this.router.navigate(['/login']);
   }
 }

@@ -1,14 +1,16 @@
-import {ChangeDetectionStrategy, Component, inject, input, output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, inject, input, output, signal, viewChild} from '@angular/core';
 import {Router} from '@angular/router';
 import {Pattern} from '../../../core/models/pattern.model';
 import {PatternApiService} from '../../../core/services/pattern-api.service';
 import {catchError, EMPTY, first} from 'rxjs';
 import {tap} from 'rxjs/operators';
+import {A11yModule} from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-pattern-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './pattern-card.component.html',
+  imports: [A11yModule],
 })
 export class PatternCardComponent {
   private readonly api = inject(PatternApiService);
@@ -20,6 +22,8 @@ export class PatternCardComponent {
   readonly confirmingDelete = signal(false);
   readonly deleting = signal(false);
   readonly deleteError = signal<string | null>(null);
+
+  readonly deleteBtn = viewChild<ElementRef<HTMLButtonElement>>('deleteBtn');
 
   lastEdited() {
     return new Intl.DateTimeFormat('en-US', {dateStyle: 'medium'}).format(
@@ -33,6 +37,16 @@ export class PatternCardComponent {
 
   onView() {
     void this.router.navigate(['/patterns', this.pattern()._id], {queryParams: {mode: 'view'}});
+  }
+
+  openDeleteDialog(): void {
+    this.confirmingDelete.set(true);
+  }
+
+  cancelDelete(): void {
+    this.confirmingDelete.set(false);
+    // Return focus to the Delete button that opened the dialog
+    this.deleteBtn()?.nativeElement.focus();
   }
 
   onDeleteConfirmed() {

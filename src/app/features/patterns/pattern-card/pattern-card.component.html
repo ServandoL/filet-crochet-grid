@@ -31,8 +31,9 @@
       View
     </button>
     <button
+      #deleteBtn
       type="button"
-      (click)="confirmingDelete.set(true)"
+      (click)="openDeleteDialog()"
       class="rounded-lg border border-red-200 bg-red-50 text-red-600 text-sm font-medium
              px-3 py-1.5 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-400
              transition"
@@ -50,6 +51,8 @@
 <!-- Confirm delete dialog -->
 @if (confirmingDelete()) {
   <div
+    cdkTrapFocus
+    cdkTrapFocusAutoCapture
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
     role="dialog"
     aria-modal="true"
@@ -65,8 +68,9 @@
       <p class="text-sm text-gray-600 mb-6">This cannot be undone.</p>
       <div class="flex gap-3 justify-end">
         <button
+          cdkFocusInitial
           type="button"
-          (click)="confirmingDelete.set(false)"
+          (click)="cancelDelete()"
           class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700
                  hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
         >
@@ -86,4 +90,3 @@
     </div>
   </div>
 }
-

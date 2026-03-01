@@ -35,6 +35,10 @@
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.prod.ts"
+                },
+                {
+                  "replace": "src/axe-init.ts",
+                  "with": "src/axe-init.prod.ts"
                 }
               ],
               "budgets": [
@@ -54,7 +58,8 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "allowedCommonJsDependencies": ["axe-core"]
             }
           },
           "defaultConfiguration": "production"
