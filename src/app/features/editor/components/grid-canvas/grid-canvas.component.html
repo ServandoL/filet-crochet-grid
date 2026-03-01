@@ -1,6 +1,6 @@
 <!--
-  touch-action: none — prevents the browser from claiming touch gestures (pinch/pan)
-  before the JS touch handlers in GridCanvasComponent can intercept them.
+  touch-action: pan-x pan-y — allows the browser to handle scrolling (panning)
+  while we intercept pinch-zoom gestures in JS (which is not included here).
 
   Scroll-sync note: row/column header strips use CSS `position: sticky` inside a shared
   overflow-auto scroll container. This means the browser natively keeps the headers
@@ -8,7 +8,7 @@
   unnecessary. This is a deliberate architectural decision (see design.md Decision #1).
 -->
 <div
-  class="relative origin-top-left touch-none"
+  class="relative origin-top-left touch-pan-x touch-pan-y"
   [style.width.px]="cols() * cellSize() * zoomLevel()"
   [style.height.px]="rows() * cellSize() * zoomLevel()"
 >
