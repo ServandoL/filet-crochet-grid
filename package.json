@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "docker:up": "docker compose up --build -d",
+    "docker:up": "npm run build --configuration=production && docker compose up --build -d",
     "docker:down": "docker compose down"
   },
   "prettier": {
