@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../../environments/environment';
-import {CreatePatternDto, Pattern, UpdatePatternDto,} from '../models/pattern.model';
+import {CreatePatternDto, Pattern, Progress, UpdatePatternDto, UpsertProgressDto} from '../models/pattern.model';
 
 @Injectable({providedIn: 'root'})
 export class PatternApiService {
@@ -25,7 +25,7 @@ export class PatternApiService {
       name: dto.name,
       rows: dto.rows,
       updatedAt: time
-    }
+    };
     return this.http.post<Pattern>(this.base, pattern);
   }
 
@@ -36,5 +36,16 @@ export class PatternApiService {
   deletePattern(id: string) {
     return this.http.delete<void>(`${this.base}/${id}`);
   }
-}
 
+  getProgress(patternId: string) {
+    return this.http.get<Progress>(`${this.base}/${patternId}/progress`);
+  }
+
+  upsertProgress(patternId: string, dto: UpsertProgressDto) {
+    return this.http.put<Progress>(`${this.base}/${patternId}/progress`, dto);
+  }
+
+  deleteProgress(patternId: string) {
+    return this.http.delete<void>(`${this.base}/${patternId}/progress`);
+  }
+}

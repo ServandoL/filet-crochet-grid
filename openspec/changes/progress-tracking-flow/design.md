@@ -71,11 +71,11 @@ Crafters need a way to track physical progress through a pattern — marking row
 
 ---
 
-### 5. `ProgressSaveService` mirrors `PatternSaveService`
+### 5. `createSavePipeline` factory eliminates duplication between save services
 
-**Decision:** Create a new `ProgressSaveService` (`providedIn: 'root'`) with the same interface: `isDirty` signal, `saveStatus` signal, `scheduleAutoSave(state)` (2 s debounce), `saveNow(state)`. The save target is `PUT /api/patterns/:id/progress`.
+**Decision:** Extract the shared debounce pipeline logic into a plain TypeScript factory function `createSavePipeline<TState>(persist, destroyRef, debounceMs?)` in `create-save-pipeline.ts`. Both `PatternSaveService` and `ProgressSaveService` delegate to this factory, exposing the same public API (`isDirty`, `saveStatus`, `scheduleAutoSave`, `saveNow`).
 
-**Rationale:** The save UX requirement ("mirror edit mode") is explicitly stated. Reusing the same conceptual pattern avoids teaching users a new interaction model. A separate service keeps concerns isolated — progress saves never interfere with pattern design saves.
+**Rationale:** Both services are structurally identical except for the state type and the single API call inside `doSave()`. An abstract base class would work but Angular discourages `inject()` in base class constructors — it creates implicit coupling and test friction. A plain factory function (composition over inheritance) keeps `inject()` where Angular expects it (in the service field initializer), is fully generic via `TState`, and requires zero DI machinery. `SaveStatus` is exported once from the factory module and re-exported by each service so downstream consumers are unaffected.
 
 ---
 

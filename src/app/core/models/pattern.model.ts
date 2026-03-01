@@ -21,6 +21,17 @@ export interface UpdatePatternDto {
   cells?: FilledCell[];
 }
 
+/** Progress tracking — satellite document; _id matches the parent Pattern._id */
+export interface Progress {
+  _id: string;
+  highlightedCells: FilledCell[];
+  updatedAt: string;
+}
+
+export interface UpsertProgressDto {
+  highlightedCells: FilledCell[];
+}
+
 // ---------------------------------------------------------------------------
 // Serialization helpers
 // ---------------------------------------------------------------------------

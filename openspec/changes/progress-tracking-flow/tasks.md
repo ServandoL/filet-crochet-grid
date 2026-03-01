@@ -27,21 +27,16 @@
 
 ## 5. Frontend — Models and API Service
 
-- [ ] 5.1 Add `Progress` interface to `src/app/core/models/pattern.model.ts`: `{ _id: string; highlightedCells: FilledCell[]; updatedAt: string }` — `_id` equals the pattern's `_id` (satellite document pattern)
-- [ ] 5.2 Add `UpsertProgressDto` interface to `src/app/core/models/pattern.model.ts`: `{ highlightedCells: FilledCell[] }`
-- [ ] 5.3 Add `getProgress(patternId: string): Observable<Progress>` to `PatternApiService` — `GET /api/patterns/:id/progress`
-- [ ] 5.4 Add `upsertProgress(patternId: string, dto: UpsertProgressDto): Observable<Progress>` to `PatternApiService` — `PUT /api/patterns/:id/progress`
-- [ ] 5.5 Add `deleteProgress(patternId: string): Observable<void>` to `PatternApiService` — `DELETE /api/patterns/:id/progress`
+- [x] 5.1 Add `Progress` interface to `src/app/core/models/pattern.model.ts`: `{ _id: string; highlightedCells: FilledCell[]; updatedAt: string }` — `_id` equals the pattern's `_id` (satellite document pattern)
+- [x] 5.2 Add `UpsertProgressDto` interface to `src/app/core/models/pattern.model.ts`: `{ highlightedCells: FilledCell[] }`
+- [x] 5.3 Add `getProgress(patternId: string): Observable<Progress>` to `PatternApiService` — `GET /api/patterns/:id/progress`
+- [x] 5.4 Add `upsertProgress(patternId: string, dto: UpsertProgressDto): Observable<Progress>` to `PatternApiService` — `PUT /api/patterns/:id/progress`
+- [x] 5.5 Add `deleteProgress(patternId: string): Observable<void>` to `PatternApiService` — `DELETE /api/patterns/:id/progress`
 
 ## 6. Frontend — Progress State Model and Save Service
 
-- [ ] 6.1 Create `src/app/features/editor/models/progress-state.model.ts` — export `ProgressState` interface: `{ patternId: string; highlightedCells: Set<string>; patternUpdatedAt: string; progressUpdatedAt: string | null }` — `patternId` is the local name for the value sourced from the route `:id` param and from `Progress._id`
-- [ ] 6.2 Create `src/app/features/editor/services/progress-save.service.ts` — `providedIn: 'root'`, mirroring `PatternSaveService`:
-  - `isDirty` signal (`boolean`)
-  - `saveStatus` signal (`'idle' | 'saving' | 'saved' | 'error'`)
-  - `scheduleAutoSave(state: ProgressState): void` — debounce 2 s, calls `PatternApiService.upsertProgress()`
-  - `saveNow(state: ProgressState): void` — immediate save bypassing debounce
-  - Reset `isDirty` to `false` and show `'saved'` status for 2 s on success; set `'error'` on failure
+- [x] 6.1 Create `src/app/features/editor/models/progress-state.model.ts` — export `ProgressState` interface: `{ patternId: string; highlightedCells: Set<string>; patternUpdatedAt: string; progressUpdatedAt: string | null }` — `patternId` is the local name for the value sourced from the route `:id` param and from `Progress._id`
+- [x] 6.2 Create `src/app/features/editor/services/create-save-pipeline.ts` — generic factory `createSavePipeline<TState>(persist, destroyRef, debounceMs?)` returning `SavePipeline<TState>` with `isDirty`, `saveStatus`, `scheduleAutoSave`, `saveNow`; export `SaveStatus` type from this module. Refactor `PatternSaveService` and `ProgressSaveService` to delegate to this factory — each service exposes the same public API surface, only the `persist` callback differs.
 
 ## 7. Frontend — GridCanvasComponent: Highlight Overlay
 
