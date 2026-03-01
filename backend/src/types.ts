@@ -26,6 +26,6 @@ export interface CreatePatternDto {
 }
 
 export interface UpdatePatternDto {
-  name?: string;
-  cells?: FilledCell[];
+  name?: string | undefined;
+  cells?: FilledCell[] | undefined;
 }
