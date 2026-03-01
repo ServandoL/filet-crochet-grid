@@ -22,7 +22,9 @@ import cors from '@koa/cors';
 
   app.use(router.routes()).use(router.allowedMethods());
 
-  app.listen(process.env['PORT'] || 9000);
+  app.listen(process.env['PORT'] || 9000, () => {
+    log.info('Server is running on port ' + process.env['PORT']);
+  });
 })().catch(error => {
   log.error({
     location: 'server',

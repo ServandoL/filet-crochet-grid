@@ -17,28 +17,18 @@ export class MongoDatabase {
   }
 
   public static async initialize() {
-    const loc = MongoDatabase + '.initialize';
     const url = process.env['MONGO_URL'] || 'mongodb://localhost:27017';
     const dbName = process.env['MONGO_DB_NAME'] || 'test';
     const client = new MongoClient(url);
     client.on('error', err => {
       const error = toError(err);
-      log.info({location: loc, error})
+      log.info(error)
     }).on('connectionReady', event => {
-      log.info({
-        location: loc,
-        event: event,
-      })
+      log.info(event)
     }).on('commandSucceeded', event => {
-      log.info({
-        location: loc,
-        event: event,
-      })
+      log.info(event)
     }).on('commandFailed', event => {
-      log.info({
-        location: loc,
-        event: event,
-      })
+      log.info(event)
     });
     MongoDatabase._instance = new MongoDatabase(client, dbName);
     await MongoDatabase._instance._client.connect();
