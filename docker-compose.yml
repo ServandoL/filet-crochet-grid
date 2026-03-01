@@ -1,0 +1,35 @@
+services:
+  # ── nginx: serves the Angular SPA and proxies /api to the backend ───────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      # Expose on all local-network interfaces on port 80
+      - "0.0.0.0:80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Koa backend ──────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    expose:
+      - "9000"
+    environment:
+      PORT: "9000"
+      # Supply these in your .env file at the repo root (never commit it)
+      MONGO_URL: "${MONGO_URL}"
+      MONGO_DB_NAME: "${MONGO_DB_NAME:-filet-crochet-grid}"
+      JWT_SECRET: "${JWT_SECRET}"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+

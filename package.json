@@ -6,7 +6,9 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down"
   },
   "prettier": {
     "printWidth": 100,
