@@ -1,5 +1,5 @@
 import {inject, Injectable, signal} from '@angular/core';
-import {catchError, delay, EMPTY, first, Observable, Subject} from 'rxjs';
+import {catchError, EMPTY, first, Observable, Subject} from 'rxjs';
 import {debounceTime, switchMap, tap} from 'rxjs/operators';
 import {PatternApiService} from '../../../core/services/pattern-api.service';
 import {GridState} from '../models/grid-state.model';
@@ -16,6 +16,8 @@ export class PatternSaveService {
   readonly saveStatus = signal<SaveStatus>('idle');
 
   private readonly saveSubject = new Subject<GridState>();
+  // Tracks the pending "reset to idle" timer so it can be cancelled on the next save.
+  private idleTimerSub: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     this.saveSubject
@@ -38,6 +40,12 @@ export class PatternSaveService {
   }
 
   private doSave(state: GridState): Observable<Pattern> {
+    // Cancel any pending "reset to idle" from a previous successful save so the
+    // new save cycle starts cleanly.
+    if (this.idleTimerSub !== null) {
+      clearTimeout(this.idleTimerSub);
+      this.idleTimerSub = null;
+    }
     this.saveStatus.set('saving');
     return this.api
       .updatePattern(state._id, {
@@ -48,13 +56,19 @@ export class PatternSaveService {
         tap(() => {
           this.isDirty.set(false);
           this.saveStatus.set('saved');
+          // Use a plain setTimeout (outside the switchMap chain) so a subsequent
+          // rapid save cannot cancel the 2-second "Saved ✓" display window.
+          this.idleTimerSub = setTimeout(() => {
+            this.saveStatus.set('idle');
+            this.idleTimerSub = null;
+          }, 2000);
         }),
-        delay(2000),
-        tap(() => this.saveStatus.set('idle')),
         catchError(() => {
           this.saveStatus.set('error');
-          return EMPTY
-        })
+          return EMPTY;
+        }),
       );
   }
 }
+
+

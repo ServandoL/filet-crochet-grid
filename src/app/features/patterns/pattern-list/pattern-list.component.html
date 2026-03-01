@@ -29,7 +29,7 @@
   <main class="max-w-4xl mx-auto px-4 py-8">
     @if (loading()) {
       <p class="text-center text-gray-500 text-sm mt-16">Loading…</p>
-    } @else if (patterns().length === 0) {
+    } @else if (visiblePatterns().length === 0) {
       <div class="text-center mt-24">
         <p class="text-5xl mb-4">🧶</p>
         <p class="text-gray-600 font-medium">No patterns yet.</p>
@@ -46,7 +46,7 @@
       </div>
     } @else {
       <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" role="list">
-        @for (pattern of patterns(); track pattern._id) {
+        @for (pattern of visiblePatterns(); track pattern._id) {
           <li>
             <app-pattern-card
               [pattern]="pattern"

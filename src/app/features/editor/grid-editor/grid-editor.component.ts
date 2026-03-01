@@ -3,12 +3,10 @@ import {
   Component,
   computed,
   DestroyRef,
-  ElementRef,
   inject,
   input,
   OnInit,
   signal,
-  viewChild,
 } from '@angular/core';
 import {Router} from '@angular/router';
 import {Title} from '@angular/platform-browser';
@@ -42,7 +40,6 @@ export class GridEditorComponent implements OnInit {
   private readonly titleService = inject(Title);
   private readonly destroy = inject(DestroyRef);
 
-  readonly scrollContainer = viewChild<ElementRef<HTMLDivElement>>('scrollContainer');
 
   readonly gridState = signal<GridState | null>(null);
   readonly loading = signal(true);
