@@ -10,78 +10,7 @@ import {tap} from 'rxjs/operators';
   selector: 'app-login',
   imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <main class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div class="w-full max-w-sm bg-white rounded-2xl shadow-md p-8">
-        <h1 class="text-2xl font-semibold text-gray-900 mb-6 text-center">
-          🧶 Filet Crochet Grid
-        </h1>
-
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="space-y-5">
-
-          <!-- Email -->
-          <div class="flex flex-col gap-1">
-            <label for="email" class="text-sm font-medium text-gray-700">Email</label>
-            <input
-              id="email"
-              type="email"
-              formControlName="email"
-              autocomplete="email"
-              class="rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              [class.border-red-500]="emailInvalid()"
-              [class.border-gray-300]="!emailInvalid()"
-              aria-describedby="email-error"
-            />
-            @if (emailInvalid()) {
-              <p id="email-error" class="text-xs text-red-600" role="alert">
-                @if (email.hasError('required')) {
-                  Email is required.
-                } @else if (email.hasError('email')) {
-                  Enter a valid email address.
-                }
-              </p>
-            }
-          </div>
-
-          <!-- Password -->
-          <div class="flex flex-col gap-1">
-            <label for="password" class="text-sm font-medium text-gray-700">Password</label>
-            <input
-              id="password"
-              type="password"
-              formControlName="password"
-              autocomplete="current-password"
-              class="rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              [class.border-red-500]="passwordInvalid()"
-              [class.border-gray-300]="!passwordInvalid()"
-              aria-describedby="password-error"
-            />
-            @if (passwordInvalid()) {
-              <p id="password-error" class="text-xs text-red-600" role="alert">
-                Password is required.
-              </p>
-            }
-          </div>
-
-          <!-- API error -->
-          @if (apiError()) {
-            <p class="text-sm text-red-600 text-center" role="alert">{{ apiError() }}</p>
-          }
-
-          <button
-            type="submit"
-            class="w-full rounded-lg bg-indigo-600 text-white py-2 text-sm font-medium
-                   hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500
-                   focus:ring-offset-2 disabled:opacity-50 transition"
-            [disabled]="loading()"
-          >
-            {{ loading() ? 'Signing in…' : 'Log In' }}
-          </button>
-
-        </form>
-      </div>
-    </main>
-  `,
+  templateUrl: './login.component.html',
 })
 export class LoginComponent implements OnInit {
   private readonly fb = inject(FormBuilder);

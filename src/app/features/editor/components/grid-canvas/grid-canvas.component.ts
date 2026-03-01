@@ -22,23 +22,7 @@ const DEFAULT_CELL_SIZE = 24;
 @Component({
   selector: 'app-grid-canvas',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div
-      class="relative origin-top-left"
-      [style.width.px]="cols() * cellSize()"
-      [style.height.px]="rows() * cellSize()"
-      [style.transform]="'scale(' + zoomLevel() + ')'"
-      [style.transform-origin]="'top left'"
-    >
-      <canvas
-        #canvas
-        [attr.aria-label]="'Filet crochet grid, ' + rows() + ' rows by ' + cols() + ' columns'"
-        role="img"
-        class="block"
-        (click)="onCanvasClick($event)"
-      ></canvas>
-    </div>
-  `,
+  templateUrl: './grid-canvas.component.html',
   host: {
     class: 'block',
   },
