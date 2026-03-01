@@ -31,11 +31,11 @@ describe('GridCanvasComponent', () => {
 
   function createTouchEvent(type: string, touches: Partial<Touch>[]): TouchEvent {
     const event = new TouchEvent(type, {
-      touches: touches as Touch[],
-      changedTouches: touches as Touch[],
       bubbles: true,
       cancelable: true
     });
+    Object.defineProperty(event, 'touches', { value: touches });
+    Object.defineProperty(event, 'changedTouches', { value: touches });
     return event;
   }
 
