@@ -2,11 +2,17 @@ import {type DeleteResult, ObjectId, type PushOperator, type UpdateFilter, type 
 import {MongoDatabase} from '../mongo.js';
 import {log} from '../logger.js';
 import type {DbPattern, UpdatePatternDto} from '../types.js';
+import {ProgressService} from './progress.service.js';
 
 export class PatternsService {
   public static async deletePattern(id: string): Promise<DeleteResult | undefined> {
     try {
-      return await MongoDatabase.instance.patterns.deleteOne({_id: new ObjectId(id)});
+      const deleteResult = await MongoDatabase.instance.patterns.deleteOne({_id: new ObjectId(id)});
+      if (deleteResult.acknowledged && deleteResult.deletedCount) {
+        // Cascade-delete the associated progress document (ignore errors — orphan is acceptable)
+        await ProgressService.deleteByPatternId(id);
+      }
+      return deleteResult;
     } catch (error) {
       log.warn(error);
       return undefined;

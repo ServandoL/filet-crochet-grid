@@ -1,7 +1,7 @@
 import {Collection, Db, type Document, MongoClient, type WithId} from 'mongodb';
 import {log} from './logger.js';
 import {toError} from './utils.js';
-import type {DbPattern} from './types.js';
+import type {DbPattern, DbProgress} from './types.js';
 
 export class MongoDatabase {
   private readonly $Patterns = 'PATTERNS';
@@ -40,6 +40,10 @@ export class MongoDatabase {
 
   public get patterns(): Collection<DbPattern> {
     return this._db.collection<DbPattern>(this.$Patterns)
+  }
+
+  public get progress(): Collection<DbProgress> {
+    return this._db.collection<DbProgress>('PROGRESS');
   }
 
   public collection<T extends WithId<Document> = WithId<Document>>(name: string): Collection<T> {

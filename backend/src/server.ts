@@ -6,13 +6,14 @@ import {log} from './logger.js';
 import {toError, traceHeaders} from './utils.js';
 import cors from '@koa/cors';
 import {patternsRouter} from './controllers/patterns.controller.js';
+import {progressRouter} from './controllers/progress.controller.js';
 
 (async () => {
   const router = new Router();
   const app = new Koa();
   await MongoDatabase.initialize();
   app.use(cors({
-    allowMethods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    allowMethods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
   }));
   app.use(koaBody());
   app.use(traceHeaders);
@@ -41,6 +42,7 @@ import {patternsRouter} from './controllers/patterns.controller.js';
 
   app.use(router.routes()).use(router.allowedMethods());
   app.use(patternsRouter.routes()).use(patternsRouter.allowedMethods());
+  app.use(progressRouter.routes()).use(progressRouter.allowedMethods());
 
   app.listen(process.env['PORT'] || 9000, () => {
     log.info('Server is running on port ' + process.env['PORT']);

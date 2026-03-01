@@ -25,26 +25,28 @@ Crafters need a way to track physical progress through a pattern — marking row
 
 ## Decisions
 
-### 1. Separate `progress` MongoDB collection, keyed by `patternId`
+### 1. Separate `progress` MongoDB collection using the satellite document pattern
 
-**Decision:** Store progress in a new `PROGRESS` collection with a unique index on `patternId`. The document shape is `{ _id, patternId, highlightedCells: [row, col][], updatedAt }`.
+**Decision:** Store progress in a new `PROGRESS` collection where `_id` is the same `ObjectId` as the parent pattern's `_id`. The document shape is `{ _id: ObjectId (= patternId), highlightedCells: [row, col][], updatedAt }`. There is no separate `patternId` field.
 
-**Rationale:** Embedding progress in the pattern document couples two orthogonal concerns — pattern design and crafter state. They change independently (pattern edited in edit mode, progress updated in progress mode) and benefit from separate `updatedAt` timestamps, which is required for the stale-progress warning. A separate collection with a `patternId` unique index gives O(1) upsert and lookup with no complicated update logic on the existing pattern endpoint.
+**Rationale:** The relationship between a pattern and its progress is strictly 1:1 — one progress document per pattern, forever. For a 1:1 auxiliary document, using `_id` as the foreign key (the "satellite document" pattern) is the correct MongoDB idiom. It eliminates a redundant field, removes the need for a manually-created unique index (MongoDB's `_id` index is implicit and free), and makes all lookups the fastest possible (`findOne({ _id })`). The separate collection still satisfies the core goal of keeping design and progress concerns isolated with independent `updatedAt` timestamps for the stale-progress warning.
 
 **Alternatives considered:**
 - *Embed in pattern document* — simpler read (one fetch), but muddies the PATCH endpoint and races with design edits.
+- *`patternId` field with unique index* — correct for 1:many, unnecessary overhead for 1:1; two ObjectIds per document, one extra index to maintain.
 - *`localStorage` only* — zero backend work, but progress is lost when switching devices, which fails the "reopen from previous save" requirement.
 
 ---
 
 ### 2. `PUT` (full-replace upsert) for progress saves
 
-**Decision:** `PUT /api/patterns/:id/progress` always writes the complete `highlightedCells` array, using MongoDB `updateOne` with `upsert: true` and `$set`.
+**Decision:** `PUT /api/patterns/:id/progress` always writes the complete `highlightedCells` array, using MongoDB `replaceOne({ _id: ObjectId(id) }, { highlightedCells, updatedAt }, { upsert: true })`. The replacement body must not include `_id` to avoid a MongoDB conflict on upsert.
 
-**Rationale:** Progress state is held entirely in-memory as a `Set<string>` signal. Writing the full snapshot is simpler and more correct than delta-patching (no need to track which cells changed). This mirrors how the existing pattern PATCH works for `cells`. The payload is small (typically tens to low hundreds of `[row, col]` pairs).
+**Rationale:** Progress state is held entirely in-memory as a `Set<string>` signal. Writing the full snapshot is simpler and more correct than delta-patching (no need to track which cells changed). This mirrors how the existing pattern PATCH works for `cells`. The payload is small (typically tens to low hundreds of `[row, col]` pairs). `replaceOne` is the natural fit for the satellite document pattern — the entire document is always replaced wholesale.
 
 **Alternatives considered:**
 - *`PATCH` with add/remove arrays* — lower payload on large grids, but requires client-side change tracking and more complex backend merge logic.
+- *`updateOne` with `$set`* — also works, but `replaceOne` is more semantically accurate for a full-state overwrite.
 
 ---
 

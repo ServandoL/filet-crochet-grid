@@ -1,34 +1,33 @@
 ## 1. Backend — Types, Schemas, and Models
 
-- [ ] 1.1 Add `DbProgress` interface to `backend/src/types.ts`: `{ patternId: ObjectId; highlightedCells: FilledCell[]; updatedAt: Date }`
-- [ ] 1.2 Add `ProgressDto` interface to `backend/src/types.ts`: `{ patternId: string; highlightedCells: FilledCell[]; updatedAt: string }`
-- [ ] 1.3 Add `UpsertProgressDto` interface to `backend/src/types.ts`: `{ highlightedCells: FilledCell[] }`
-- [ ] 1.4 Add `UpsertProgressSchema` to `backend/src/zod.schemas.ts`: `{ highlightedCells: z.array(FilledCellSchema) }`
+- [x] 1.1 Add `DbProgress` interface to `backend/src/types.ts`: `{ highlightedCells: FilledCell[]; updatedAt: Date }` — note: no `patternId` field; `_id` is the pattern's `ObjectId` (satellite document pattern)
+- [x] 1.2 Add `ProgressDto` interface to `backend/src/types.ts`: `{ _id: string; highlightedCells: FilledCell[]; updatedAt: string }` — `_id` equals the pattern's `_id`
+- [x] 1.3 Add `UpsertProgressDto` interface to `backend/src/types.ts`: `{ highlightedCells: FilledCell[] }`
+- [x] 1.4 Add `UpsertProgressSchema` to `backend/src/zod.schemas.ts`: `{ highlightedCells: z.array(FilledCellSchema) }`
 
 ## 2. Backend — MongoDB Collection and Service
 
-- [ ] 2.1 Add `progress` getter to `MongoDatabase` in `backend/src/mongo.ts` returning `Collection<DbProgress>` using collection name `PROGRESS`
-- [ ] 2.2 Create `backend/src/services/progress.service.ts` — `ProgressService` class with three static methods:
-  - `getByPatternId(patternId: string): Promise<WithId<DbProgress> | null>`
-  - `upsertByPatternId(patternId: string, dto: UpsertProgressDto): Promise<WithId<DbProgress> | undefined>` — uses `updateOne` with `upsert: true`, `$set: { highlightedCells, updatedAt: new Date() }`
+- [x] 2.1 Add `progress` getter to `MongoDatabase` in `backend/src/mongo.ts` returning `Collection<DbProgress>` using collection name `PROGRESS` — no index creation needed; `_id` uniqueness is implicit
+- [x] 2.2 Create `backend/src/services/progress.service.ts` — `ProgressService` class with three static methods:
+  - `getByPatternId(patternId: string): Promise<WithId<DbProgress> | null>` — `findOne({ _id: new ObjectId(patternId) })`
+  - `upsertByPatternId(patternId: string, dto: UpsertProgressDto): Promise<WithId<DbProgress> | undefined>` — uses `replaceOne({ _id: new ObjectId(patternId) }, { highlightedCells, updatedAt: new Date() }, { upsert: true })`; replacement body must NOT include `_id`; fetch and return the document after upsert
   - `deleteByPatternId(patternId: string): Promise<DeleteResult | undefined>`
-- [ ] 2.3 Add a unique index on `{ patternId: 1 }` in the `PROGRESS` collection — create it on `MongoDatabase.initialize()` via `createIndex` with `unique: true`
 
 ## 3. Backend — Progress API Endpoints
 
-- [ ] 3.1 Create `backend/src/controllers/progress.controller.ts` with `progressRouter` (Koa Router)
-- [ ] 3.2 Implement `GET /api/patterns/:id/progress` — validate `id`, call `ProgressService.getByPatternId(id)`, return `200` with `ProgressDto` or `404` if no progress document exists
-- [ ] 3.3 Implement `PUT /api/patterns/:id/progress` — validate `id`, parse body with `UpsertProgressSchema`, call `ProgressService.upsertByPatternId(id, body)`, return `200` with `ProgressDto`
-- [ ] 3.4 Implement `DELETE /api/patterns/:id/progress` — validate `id`, call `ProgressService.deleteByPatternId(id)`, return `204`
-- [ ] 3.5 Register `progressRouter` in `backend/src/server.ts`
+- [x] 3.1 Create `backend/src/controllers/progress.controller.ts` with `progressRouter` (Koa Router)
+- [x] 3.2 Implement `GET /api/patterns/:id/progress` — validate `id`, call `ProgressService.getByPatternId(id)`, return `200` with `ProgressDto` or `404` if no progress document exists
+- [x] 3.3 Implement `PUT /api/patterns/:id/progress` — validate `id`, parse body with `UpsertProgressSchema`, call `ProgressService.upsertByPatternId(id, body)`, return `200` with `ProgressDto`
+- [x] 3.4 Implement `DELETE /api/patterns/:id/progress` — validate `id`, call `ProgressService.deleteByPatternId(id)`, return `204`
+- [x] 3.5 Register `progressRouter` in `backend/src/server.ts`
 
 ## 4. Backend — Cascade Delete Progress on Pattern Delete
 
-- [ ] 4.1 Update `PatternsService.deletePattern()` in `backend/src/services/patterns.service.ts` to call `ProgressService.deleteByPatternId(id)` after a successful pattern deletion
+- [x] 4.1 Update `PatternsService.deletePattern()` in `backend/src/services/patterns.service.ts` to call `ProgressService.deleteByPatternId(id)` after a successful pattern deletion
 
 ## 5. Frontend — Models and API Service
 
-- [ ] 5.1 Add `Progress` interface to `src/app/core/models/pattern.model.ts`: `{ patternId: string; highlightedCells: FilledCell[]; updatedAt: string }`
+- [ ] 5.1 Add `Progress` interface to `src/app/core/models/pattern.model.ts`: `{ _id: string; highlightedCells: FilledCell[]; updatedAt: string }` — `_id` equals the pattern's `_id` (satellite document pattern)
 - [ ] 5.2 Add `UpsertProgressDto` interface to `src/app/core/models/pattern.model.ts`: `{ highlightedCells: FilledCell[] }`
 - [ ] 5.3 Add `getProgress(patternId: string): Observable<Progress>` to `PatternApiService` — `GET /api/patterns/:id/progress`
 - [ ] 5.4 Add `upsertProgress(patternId: string, dto: UpsertProgressDto): Observable<Progress>` to `PatternApiService` — `PUT /api/patterns/:id/progress`
@@ -36,7 +35,7 @@
 
 ## 6. Frontend — Progress State Model and Save Service
 
-- [ ] 6.1 Create `src/app/features/editor/models/progress-state.model.ts` — export `ProgressState` interface: `{ patternId: string; highlightedCells: Set<string>; patternUpdatedAt: string; progressUpdatedAt: string | null }`
+- [ ] 6.1 Create `src/app/features/editor/models/progress-state.model.ts` — export `ProgressState` interface: `{ patternId: string; highlightedCells: Set<string>; patternUpdatedAt: string; progressUpdatedAt: string | null }` — `patternId` is the local name for the value sourced from the route `:id` param and from `Progress._id`
 - [ ] 6.2 Create `src/app/features/editor/services/progress-save.service.ts` — `providedIn: 'root'`, mirroring `PatternSaveService`:
   - `isDirty` signal (`boolean`)
   - `saveStatus` signal (`'idle' | 'saving' | 'saved' | 'error'`)

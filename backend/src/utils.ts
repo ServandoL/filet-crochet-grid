@@ -1,7 +1,7 @@
 import type Koa from 'koa';
 import {log} from './logger.js';
 import {ObjectId, type WithId} from 'mongodb';
-import type {DbPattern, Pattern} from './types.js';
+import type {DbPattern, DbProgress, Pattern, ProgressDto} from './types.js';
 
 export function toError(error: Error | undefined) {
   return {
@@ -50,4 +50,12 @@ export function toPatternResponse(pattern: WithId<DbPattern>): Pattern {
     createdAt: pattern.createdAt.toISOString(),
     updatedAt: pattern.updatedAt.toISOString(),
   }
+}
+
+export function toProgressResponse(progress: WithId<DbProgress>): ProgressDto {
+  return {
+    _id: progress._id.toHexString(),
+    highlightedCells: progress.highlightedCells,
+    updatedAt: progress.updatedAt.toISOString(),
+  };
 }

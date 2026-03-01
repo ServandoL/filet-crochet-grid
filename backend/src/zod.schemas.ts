@@ -20,3 +20,9 @@ export const PatternPatchSchema = z.object({
   name: z.string().optional(),
   cells: z.array(FilledCellSchema).optional(),
 });
+
+export const UpsertProgressSchema = z.object({
+  highlightedCells: z.array(FilledCellSchema),
+});
+
+export type UpsertProgress = z.infer<typeof UpsertProgressSchema>;

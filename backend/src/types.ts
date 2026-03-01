@@ -1,3 +1,4 @@
+
 export type FilledCell = [number, number];
 
 export interface Pattern {
@@ -28,4 +29,19 @@ export interface CreatePatternDto {
 export interface UpdatePatternDto {
   name?: string | undefined;
   cells?: FilledCell[] | undefined;
+}
+
+export interface DbProgress {
+  highlightedCells: FilledCell[];
+  updatedAt: Date;
+}
+
+export interface ProgressDto {
+  _id: string;
+  highlightedCells: FilledCell[];
+  updatedAt: string;
+}
+
+export interface UpsertProgressDto {
+  highlightedCells: FilledCell[];
 }
