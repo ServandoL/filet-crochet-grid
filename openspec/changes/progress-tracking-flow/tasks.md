@@ -88,7 +88,7 @@
 
 - [x] 12.1 Stale-progress warning banner: `text-amber-800` on `bg-amber-50` = 7.5:1 contrast ✓ WCAG AA
 - [x] 12.2 Clear All Progress dialog traps focus (`cdkTrapFocus`); Cancel has `cdkFocusInitial`; closing returns focus to Clear All button
-- [x] 12.3 Teal border uses `#0f766e` (teal-700): 4.54:1 on white, 3.04:1 on black — both pass WCAG AA 3:1 non-text contrast
+- [x] 12.3 Highlight border is adaptive: `#ffffff` (white, 21:1) on filled (black) cells — WCAG AAA; `#0f766e` (teal-700, 5.07:1) on empty (white) cells — WCAG AA; `lineWidth = 3` for visibility at small zoom
 - [x] 12.4 Row/col headers in progress mode: min 44px via `buttonSize` computed; aria-labels updated to "tap to mark complete"
 - [x] 12.5 `aria-live="polite"` region added to progress toolbar for save status feedback
 

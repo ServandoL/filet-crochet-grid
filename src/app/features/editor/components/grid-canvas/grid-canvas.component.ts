@@ -117,13 +117,16 @@ export class GridCanvasComponent implements OnDestroy {
     }
     ctx.stroke();
 
-    // Progress highlight overlay — 2 px inset teal border per highlighted cell
+    // Progress highlight overlay — 3 px inset border per highlighted cell.
+    // Colour adapts to the cell background so the ring is always legible:
+    //   filled (black) → white   #ffffff  21:1    WCAG AAA
+    //   empty  (white) → teal-700 #0f766e  5.07:1  WCAG AA
     const highlighted = this.highlightedCells();
     if (highlighted.size > 0) {
-      ctx.strokeStyle = '#0f766e'; // teal-700 — meets WCAG AA 3:1 on both white and black
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 3;
       for (const key of highlighted) {
         const [r, c] = key.split(',').map(Number);
+        ctx.strokeStyle = filled.has(key) ? '#ffffff' : '#0f766e';
         ctx.strokeRect(c * cellSize + 2, r * cellSize + 2, cellSize - 4, cellSize - 4);
       }
     }
