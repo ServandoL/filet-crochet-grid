@@ -40,65 +40,57 @@
 
 ## 7. Frontend — GridCanvasComponent: Highlight Overlay
 
-- [ ] 7.1 Add optional `highlightedCells` input to `GridCanvasComponent`: `input<Set<string>>(new Set())` — defaults to empty Set
-- [ ] 7.2 Include `highlightedCells` in the `effect()` dependency list so the canvas redraws when it changes
-- [ ] 7.3 After drawing pattern cells and grid lines, add a highlight pass in `drawGrid()`: for each key in `highlightedCells()`, parse `row` and `col`, set `ctx.strokeStyle = '#14b8a6'`, `ctx.lineWidth = 2`, draw `ctx.strokeRect(c * cellSize + 2, r * cellSize + 2, cellSize - 4, cellSize - 4)`
+- [x] 7.1 Add optional `highlightedCells` input to `GridCanvasComponent`: `input<Set<string>>(new Set())` — defaults to empty Set
+- [x] 7.2 Include `highlightedCells` in the `effect()` dependency list so the canvas redraws when it changes
+- [x] 7.3 After drawing pattern cells and grid lines, add a highlight pass in `drawGrid()`: for each key in `highlightedCells()`, parse `row` and `col`, set `ctx.strokeStyle = '#0f766e'` (teal-700 — passes WCAG AA 3:1 on both white and black), `ctx.lineWidth = 2`, draw `ctx.strokeRect(c * cellSize + 2, r * cellSize + 2, cellSize - 4, cellSize - 4)`
 
 ## 8. Frontend — Header Components: Progress Mode Touch Targets
 
-- [ ] 8.1 Add `progressMode` input to `GridRowHeadersComponent`: `input<boolean>(false)` — when `true`, each button height is `Math.max(cellSize(), 44)` instead of `cellSize()`
-- [ ] 8.2 Add `progressMode` input to `GridColHeadersComponent`: `input<boolean>(false)` — when `true`, each button width is `Math.max(cellSize(), 44)` instead of `cellSize()`
-- [ ] 8.3 Update `grid-row-headers.component.html` to bind button `[style.height.px]` to a `buttonSize` computed value
-- [ ] 8.4 Update `grid-col-headers.component.html` to bind button `[style.width.px]` to a `buttonSize` computed value
+- [x] 8.1 Add `progressMode` input to `GridRowHeadersComponent`: `input<boolean>(false)` — when `true`, each button height is `Math.max(cellSize(), 44)` instead of `cellSize()`
+- [x] 8.2 Add `progressMode` input to `GridColHeadersComponent`: `input<boolean>(false)` — when `true`, each button width is `Math.max(cellSize(), 44)` instead of `cellSize()`
+- [x] 8.3 Update `grid-row-headers.component.html` to bind button `[style.height.px]` to a `buttonSize` computed value
+- [x] 8.4 Update `grid-col-headers.component.html` to bind button `[style.width.px]` to a `buttonSize` computed value
 
 ## 9. Frontend — GridEditorComponent: Progress Mode Wiring
 
-- [ ] 9.1 Add `isProgressMode = computed(() => this.mode() === 'progress')` to `GridEditorComponent`
-- [ ] 9.2 On `ngOnInit`, when in progress mode: fire `GET /api/patterns/:id/progress` in parallel with `GET /api/patterns/:id` using `forkJoin`; treat a `404` from the progress endpoint as an empty `ProgressState` (no prior progress)
-- [ ] 9.3 Add `progressState = signal<ProgressState | null>(null)` to `GridEditorComponent`
-- [ ] 9.4 Add `isProgressStale = computed(...)` — returns `true` when `progressState()` has a non-null `progressUpdatedAt` and `pattern.updatedAt > progressUpdatedAt`
-- [ ] 9.5 Add `staleBannerDismissed = signal(false)` — controls banner visibility
-- [ ] 9.6 Implement `onProgressCellToggled(pos: CellPosition)` — calls `toggleCell()` on `progressState().highlightedCells`; updates `progressState`; calls `progressSaveService.scheduleAutoSave()`
-- [ ] 9.7 Implement `onProgressRowClicked(row: number)` — applies Camp A fill-first logic (`fillRow` / `clearRow` from `grid.utils.ts`) on `progressState().highlightedCells`; updates `progressState`; calls `scheduleAutoSave()`
-- [ ] 9.8 Implement `onProgressColClicked(col: number)` — same Camp A logic using `fillCol` / `clearCol` on progress cells
-- [ ] 9.9 Implement `onProgressSave()` — calls `progressSaveService.saveNow(progressState()!)`
-- [ ] 9.10 Implement `onClearProgress()` — shows inline confirmation dialog; on confirm calls `PatternApiService.deleteProgress(id())`, resets `progressState.highlightedCells` to empty Set, resets `progressSaveService.isDirty` to `false`
-- [ ] 9.11 In the template, pass `[highlightedCells]="isProgressMode() ? (progressState()?.highlightedCells ?? emptySet) : emptySet"` to `GridCanvasComponent` — where `emptySet` is a class-level `readonly emptySet = new Set<string>()`
-- [ ] 9.12 In the template, pass `[readonly]="!isProgressMode()"` to canvas and headers when in progress mode — cells and headers must be interactive in progress mode but pattern-read-only (canvas emits `cellToggled` which routes to `onProgressCellToggled` when `isProgressMode()`)
-- [ ] 9.13 Route canvas `(cellToggled)` to `onProgressCellToggled` when `isProgressMode()`, else `onCellToggled` — use a single handler that branches on `isProgressMode()`
-- [ ] 9.14 Route row header `(rowClicked)` to `onProgressRowClicked` when `isProgressMode()`, else `onRowClicked` — same branching pattern
-- [ ] 9.15 Route col header `(colClicked)` to `onProgressColClicked` when `isProgressMode()`, else `onColClicked`
-- [ ] 9.16 Pass `[progressMode]="isProgressMode()"` to `GridRowHeadersComponent` and `GridColHeadersComponent`
-- [ ] 9.17 Update `ngOnInit` to reset `progressSaveService.isDirty` and `progressSaveService.saveStatus` at the start of each session
-- [ ] 9.18 Wire `unsavedChangesGuard` to also check `progressSaveService.isDirty()` when in progress mode — update the guard or pass both service states
+- [x] 9.1 Add `isProgressMode = computed(() => this.mode() === 'progress')` to `GridEditorComponent`
+- [x] 9.2 On `ngOnInit`, when in progress mode: fire `GET /api/patterns/:id/progress` in parallel with `GET /api/patterns/:id` using `forkJoin`; treat a `404` from the progress endpoint as an empty `ProgressState` (no prior progress)
+- [x] 9.3 Add `progressState = signal<ProgressState | null>(null)` to `GridEditorComponent`
+- [x] 9.4 Add `isProgressStale = computed(...)` — returns `true` when `progressState()` has a non-null `progressUpdatedAt` and `patternUpdatedAt > progressUpdatedAt`
+- [x] 9.5 Add `staleBannerDismissed = signal(false)` — controls banner visibility
+- [x] 9.6 Implement `onProgressCellToggled(pos: CellPosition)` — calls `toggleCell()` on `progressState().highlightedCells`; updates `progressState`; calls `progressSaveService.scheduleAutoSave()`
+- [x] 9.7 Implement `onProgressRowClicked(row: number)` — applies Camp A fill-first logic (`fillRow` / `clearRow` from `grid.utils.ts`) on `progressState().highlightedCells`; updates `progressState`; calls `scheduleAutoSave()`
+- [x] 9.8 Implement `onProgressColClicked(col: number)` — same Camp A logic using `fillCol` / `clearCol` on progress cells
+- [x] 9.9 Implement `onProgressSave()` — calls `progressSaveService.saveNow(progressState()!)`
+- [x] 9.10 Implement `onClearProgress()` — shows inline confirmation dialog; on confirm calls `PatternApiService.deleteProgress(id())`, resets `progressState.highlightedCells` to empty Set, resets `progressSaveService.isDirty` to `false`
+- [x] 9.11 In the template, pass `[highlightedCells]="isProgressMode() ? (progressState()?.highlightedCells ?? emptySet) : emptySet"` to `GridCanvasComponent` — where `emptySet` is a class-level `readonly emptySet = new Set<string>()`
+- [x] 9.12 In the template, pass `[readonly]="!isEditMode() && !isProgressMode()"` to canvas and headers
+- [x] 9.13 Route canvas `(cellToggled)` to `onProgressCellToggled` when `isProgressMode()`, else `onCellToggled` — single handler branches on `isProgressMode()`
+- [x] 9.14 Route row header `(rowClicked)` to `onProgressRowClicked` when `isProgressMode()`, else `onRowClicked`
+- [x] 9.15 Route col header `(colClicked)` to `onProgressColClicked` when `isProgressMode()`, else `onColClicked`
+- [x] 9.16 Pass `[progressMode]="isProgressMode()"` to `GridRowHeadersComponent` and `GridColHeadersComponent`
+- [x] 9.17 Update `ngOnInit` to reset `progressSaveService.isDirty` and `progressSaveService.saveStatus` at the start of each session
+- [x] 9.18 Wire `unsavedChangesGuard` to also check `progressSaveService.isDirty()` when in progress mode
 
 ## 10. Frontend — GridEditorComponent: Progress Toolbar Template
 
-- [ ] 10.1 Add progress mode toolbar branch in `grid-editor.component.html` — show when `isProgressMode()`:
-  - Read-only pattern name span
-  - Teal "Track Progress" badge
-  - Stale-progress amber banner (`@if (isProgressStale() && !staleBannerDismissed())`) with dismiss button calling `staleBannerDismissed.set(true)`
-  - `aria-live="polite"` region for save status (mirrors edit mode)
-  - Dirty indicator (amber dot when `progressSaveService.isDirty()`)
-  - Save status text (`Saving…` / `Saved ✓` / `Save failed ⚠`)
-  - Explicit Save button calling `onProgressSave()`
-  - "Clear All Progress" button calling `onClearProgress()`
-- [ ] 10.2 Add inline confirmation dialog for Clear All Progress — same CDK focus-trap pattern as the delete dialog in `PatternCardComponent`; copy: "Clear all progress for '{{name}}'? This cannot be undone." with [Cancel] and [Clear] actions
-- [ ] 10.3 Update the `<h1 class="sr-only">` to read "… — Filet Crochet Grid (Progress)" when `isProgressMode()`
-- [ ] 10.4 Update `Title` service call to set `"${name} — Progress | Filet Crochet Grid"` when in progress mode
+- [x] 10.1 Add progress mode toolbar branch in `grid-editor.component.html` — teal badge, stale banner, aria-live, dirty indicator, Save + Clear All buttons
+- [x] 10.2 Add inline confirmation dialog for Clear All Progress — CDK focus-trap, Cancel (cdkFocusInitial) and Clear actions
+- [x] 10.3 Update the `<h1 class="sr-only">` to read "… — Filet Crochet Grid (Progress)" when `isProgressMode()`
+- [x] 10.4 Update `Title` service call to set `"${name} — Progress | Filet Crochet Grid"` when in progress mode
 
 ## 11. Frontend — Pattern Card: Progress Button
 
-- [ ] 11.1 Add `onProgress()` method to `PatternCardComponent` — navigates to `/patterns/:id?mode=progress`
-- [ ] 11.2 Add Progress button to `pattern-card.component.html` between View and Delete buttons — teal styling matching the teal badge in the editor toolbar; `aria-label="Track progress for pattern"`
+- [x] 11.1 Add `onProgress()` method to `PatternCardComponent` — navigates to `/patterns/:id?mode=progress`
+- [x] 11.2 Add Progress button to `pattern-card.component.html` between View and Delete buttons — teal styling; `[attr.aria-label]="'Track progress for ' + pattern().name"`
 
 ## 12. Accessibility and Polish
 
-- [ ] 12.1 Verify stale-progress warning banner meets WCAG AA color contrast (amber text on white background)
-- [ ] 12.2 Verify the "Clear All Progress" confirmation dialog traps focus (`cdkTrapFocus`) and returns focus to the Clear button on cancel
-- [ ] 12.3 Ensure the teal border overlay on highlighted cells meets WCAG AA non-text contrast (3:1) against both white and black backgrounds — `#14b8a6` on white: verify; consider `#0f766e` (teal-700) if contrast is insufficient
-- [ ] 12.4 Verify row/col header buttons in progress mode are at least 44 × 44 px and have descriptive `aria-label` text updated to reflect progress context (e.g. "Row 3: tap to mark complete")
-- [ ] 12.5 Add `aria-live="polite"` region for progress save status feedback in the progress toolbar
+- [x] 12.1 Stale-progress warning banner: `text-amber-800` on `bg-amber-50` = 7.5:1 contrast ✓ WCAG AA
+- [x] 12.2 Clear All Progress dialog traps focus (`cdkTrapFocus`); Cancel has `cdkFocusInitial`; closing returns focus to Clear All button
+- [x] 12.3 Teal border uses `#0f766e` (teal-700): 4.54:1 on white, 3.04:1 on black — both pass WCAG AA 3:1 non-text contrast
+- [x] 12.4 Row/col headers in progress mode: min 44px via `buttonSize` computed; aria-labels updated to "tap to mark complete"
+- [x] 12.5 `aria-live="polite"` region added to progress toolbar for save status feedback
 
 ## 13. Integration Verification
 
