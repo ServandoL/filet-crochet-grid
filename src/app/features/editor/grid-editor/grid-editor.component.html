@@ -29,7 +29,7 @@
       <span class="flex-1 text-sm font-semibold text-gray-900 truncate px-1">
         {{ gridState()?.name }}
       </span>
-      <span class="text-xs text-gray-400 bg-gray-100 rounded px-2 py-0.5">
+      <span class="text-xs text-gray-700 bg-gray-100 rounded px-2 py-0.5">
         Viewing — Read Only
       </span>
     }
@@ -48,14 +48,16 @@
     @if (isEditMode()) {
       <div class="flex items-center gap-2 shrink-0">
         @if (saveService.saveStatus() === 'saving') {
-          <span class="text-xs text-gray-400">Saving…</span>
+          <span class="text-xs text-gray-500">Saving…</span>
         } @else if (saveService.saveStatus() === 'saved') {
-          <span class="text-xs text-green-600">Saved ✓</span>
+          <span class="text-xs text-green-700">Saved ✓</span>
         } @else if (saveService.saveStatus() === 'error') {
           <span class="text-xs text-red-600">Save failed ⚠</span>
         } @else if (saveService.isDirty()) {
-          <span class="inline-block w-2 h-2 rounded-full bg-amber-400"
-                title="Unsaved changes" aria-label="Unsaved changes"></span>
+          <span
+            role="img"
+            class="inline-block w-2 h-2 rounded-full bg-amber-700"
+            aria-label="Unsaved changes"></span>
         }
 
         <button
@@ -71,51 +73,59 @@
     }
   </header>
 
-  @if (loading()) {
-    <div class="flex-1 flex items-center justify-center text-gray-400 text-sm">
-      Loading pattern…
-    </div>
-  } @else if (gridState(); as state) {
-    <!-- Scrollable grid area -->
-    <div
-      class="flex-1 overflow-auto"
-      (zoomchange)="onZoomChange($event)"
-    >
-      <!-- Col headers (sticky top) -->
-      <div class="sticky top-0 z-10 bg-white">
-        <app-grid-col-headers
-          [cols]="state.cols"
-          [cellSize]="cellSize()"
-          [readonly]="!isEditMode()"
-          (colClicked)="onColClicked($event)"
-        />
-      </div>
+  <main class="flex-1 flex flex-col min-h-0">
+    <!-- Visually-hidden h1 satisfies page-has-heading-one; reads the pattern name
+         so screen readers announce the page context on arrival. -->
+    <h1 class="sr-only">
+      {{ gridState()?.name ?? 'Loading pattern' }} — Filet Crochet Grid Editor
+    </h1>
 
-      <!-- Row headers + canvas side-by-side -->
-      <div class="flex">
-        <!-- Row headers (sticky left) -->
-        <div class="sticky left-0 z-10 bg-white">
-          <app-grid-row-headers
-            [rows]="state.rows"
+    @if (loading()) {
+      <div class="flex-1 flex items-center justify-center text-gray-500 text-sm">
+        Loading pattern…
+      </div>
+    } @else if (gridState(); as state) {
+      <!-- Scrollable grid area -->
+      <div
+        class="flex-1 overflow-auto"
+        (zoomchange)="onZoomChange($event)"
+      >
+        <!-- Col headers (sticky top) -->
+        <div class="sticky top-0 z-10 bg-white">
+          <app-grid-col-headers
+            [cols]="state.cols"
             [cellSize]="cellSize()"
             [readonly]="!isEditMode()"
-            (rowClicked)="onRowClicked($event)"
+            (colClicked)="onColClicked($event)"
           />
         </div>
 
-        <!-- Canvas -->
-        <app-grid-canvas
-          [rows]="state.rows"
-          [cols]="state.cols"
-          [filledCells]="state.filledCells"
-          [cellSize]="cellSize()"
-          [zoomLevel]="zoomLevel()"
-          [readonly]="!isEditMode()"
-          (cellToggled)="onCellToggled($event)"
-        />
+        <!-- Row headers + canvas side-by-side -->
+        <div class="flex">
+          <!-- Row headers (sticky left) -->
+          <div class="sticky left-0 z-10 bg-white">
+            <app-grid-row-headers
+              [rows]="state.rows"
+              [cellSize]="cellSize()"
+              [readonly]="!isEditMode()"
+              (rowClicked)="onRowClicked($event)"
+            />
+          </div>
+
+          <!-- Canvas -->
+          <app-grid-canvas
+            [rows]="state.rows"
+            [cols]="state.cols"
+            [filledCells]="state.filledCells"
+            [cellSize]="cellSize()"
+            [zoomLevel]="zoomLevel()"
+            [readonly]="!isEditMode()"
+            (cellToggled)="onCellToggled($event)"
+          />
+        </div>
       </div>
-    </div>
-  }
+    }
+  </main>
 
 </div>
 
