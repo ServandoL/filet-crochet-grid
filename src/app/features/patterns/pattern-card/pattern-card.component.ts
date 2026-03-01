@@ -39,6 +39,10 @@ export class PatternCardComponent {
     void this.router.navigate(['/patterns', this.pattern()._id], {queryParams: {mode: 'view'}});
   }
 
+  onProgress() {
+    void this.router.navigate(['/patterns', this.pattern()._id], {queryParams: {mode: 'progress'}});
+  }
+
   openDeleteDialog(): void {
     this.confirmingDelete.set(true);
   }

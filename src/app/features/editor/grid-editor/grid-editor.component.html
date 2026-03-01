@@ -1,83 +1,151 @@
 <div class="flex flex-col h-screen bg-white">
 
   <!-- Toolbar -->
-  <header class="flex items-center gap-3 px-4 py-2 border-b border-gray-200 bg-white shrink-0 z-10">
-    <button
-      type="button"
-      (click)="onBack()"
-      class="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900
-             focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded px-2 py-1 transition"
-      aria-label="Back to pattern list"
-    >
-      ← Back
-    </button>
+  <header class="flex flex-col border-b border-gray-200 bg-white shrink-0 z-10">
+    <div class="flex items-center gap-3 px-4 py-2">
+      <button
+        type="button"
+        (click)="onBack()"
+        class="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900
+               focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded px-2 py-1 transition"
+        aria-label="Back to pattern list"
+      >
+        ← Back
+      </button>
 
-    <div class="h-5 w-px bg-gray-200"></div>
+      <div class="h-5 w-px bg-gray-200"></div>
 
-    <!-- Inline pattern name -->
-    @if (isEditMode()) {
-      <input
-        type="text"
-        class="flex-1 text-sm font-semibold text-gray-900 bg-transparent border-0
-               border-b border-transparent focus:border-indigo-400 focus:outline-none
-               px-1 py-0.5 min-w-0"
-        [value]="gridState()?.name ?? ''"
-        (input)="onNameChange($event)"
-        aria-label="Pattern name"
-      />
-    } @else {
-      <span class="flex-1 text-sm font-semibold text-gray-900 truncate px-1">
-        {{ gridState()?.name }}
-      </span>
-      <span class="text-xs text-gray-700 bg-gray-100 rounded px-2 py-0.5">
-        Viewing — Read Only
-      </span>
-    }
+      <!-- Edit mode: inline editable name -->
+      @if (isEditMode()) {
+        <input
+          type="text"
+          class="flex-1 text-sm font-semibold text-gray-900 bg-transparent border-0
+                 border-b border-transparent focus:border-indigo-400 focus:outline-none
+                 px-1 py-0.5 min-w-0"
+          [value]="gridState()?.name ?? ''"
+          (input)="onNameChange($event)"
+          aria-label="Pattern name"
+        />
 
-    <!-- Save status aria-live region -->
-    <div aria-live="polite" aria-atomic="true" class="sr-only">
-      @if (saveService.saveStatus() === 'saved') {
-        Saved.
-      }
-      @if (saveService.saveStatus() === 'error') {
-        Save failed.
+        <!-- Edit save status aria-live -->
+        <div aria-live="polite" aria-atomic="true" class="sr-only">
+          @if (saveService.saveStatus() === 'saved') { Saved. }
+          @if (saveService.saveStatus() === 'error') { Save failed. }
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          @if (saveService.saveStatus() === 'saving') {
+            <span class="text-xs text-gray-500">Saving…</span>
+          } @else if (saveService.saveStatus() === 'saved') {
+            <span class="text-xs text-green-700">Saved ✓</span>
+          } @else if (saveService.saveStatus() === 'error') {
+            <span class="text-xs text-red-600">Save failed ⚠</span>
+          } @else if (saveService.isDirty()) {
+            <span
+              role="img"
+              class="inline-block w-2 h-2 rounded-full bg-amber-700"
+              aria-label="Unsaved changes"></span>
+          }
+          <button
+            type="button"
+            (click)="onSave()"
+            class="rounded-lg bg-indigo-600 text-white text-xs font-medium px-3 py-1.5
+                   hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500
+                   focus:ring-offset-1 transition"
+          >
+            Save
+          </button>
+        </div>
+
+      <!-- Progress mode: read-only name + progress controls -->
+      } @else if (isProgressMode()) {
+        <span class="flex-1 text-sm font-semibold text-gray-900 truncate px-1">
+          {{ gridState()?.name }}
+        </span>
+        <span class="text-xs text-white bg-teal-700 rounded px-2 py-0.5 shrink-0">
+          Track Progress
+        </span>
+
+        <!-- Progress save status aria-live -->
+        <div aria-live="polite" aria-atomic="true" class="sr-only">
+          @if (progressSaveService.saveStatus() === 'saved') { Progress saved. }
+          @if (progressSaveService.saveStatus() === 'error') { Progress save failed. }
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          @if (progressSaveService.saveStatus() === 'saving') {
+            <span class="text-xs text-gray-500">Saving…</span>
+          } @else if (progressSaveService.saveStatus() === 'saved') {
+            <span class="text-xs text-green-700">Saved ✓</span>
+          } @else if (progressSaveService.saveStatus() === 'error') {
+            <span class="text-xs text-red-600">Save failed ⚠</span>
+          } @else if (progressSaveService.isDirty()) {
+            <span
+              role="img"
+              class="inline-block w-2 h-2 rounded-full bg-amber-700"
+              aria-label="Unsaved progress changes"></span>
+          }
+          <button
+            type="button"
+            (click)="onProgressSave()"
+            class="rounded-lg bg-teal-700 text-white text-xs font-medium px-3 py-1.5
+                   hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-600
+                   focus:ring-offset-1 transition"
+          >
+            Save
+          </button>
+          <button
+            type="button"
+            (click)="confirmingClearProgress.set(true)"
+            class="rounded-lg border border-red-200 bg-red-50 text-red-700 text-xs font-medium
+                   px-3 py-1.5 hover:bg-red-100 focus:outline-none focus:ring-2
+                   focus:ring-red-500 transition"
+          >
+            Clear All
+          </button>
+        </div>
+
+      <!-- View mode: read-only badge -->
+      } @else {
+        <span class="flex-1 text-sm font-semibold text-gray-900 truncate px-1">
+          {{ gridState()?.name }}
+        </span>
+        <span class="text-xs text-gray-700 bg-gray-100 rounded px-2 py-0.5">
+          Viewing — Read Only
+        </span>
       }
     </div>
 
-    <!-- Save status visual indicator -->
-    @if (isEditMode()) {
-      <div class="flex items-center gap-2 shrink-0">
-        @if (saveService.saveStatus() === 'saving') {
-          <span class="text-xs text-gray-500">Saving…</span>
-        } @else if (saveService.saveStatus() === 'saved') {
-          <span class="text-xs text-green-700">Saved ✓</span>
-        } @else if (saveService.saveStatus() === 'error') {
-          <span class="text-xs text-red-600">Save failed ⚠</span>
-        } @else if (saveService.isDirty()) {
-          <span
-            role="img"
-            class="inline-block w-2 h-2 rounded-full bg-amber-700"
-            aria-label="Unsaved changes"></span>
-        }
-
+    <!-- Stale-progress warning banner -->
+    @if (isProgressMode() && isProgressStale() && !staleBannerDismissed()) {
+      <div
+        role="alert"
+        class="flex items-center gap-2 px-4 py-2 bg-amber-50 border-t border-amber-200 text-amber-800 text-xs"
+      >
+        <span class="flex-1">
+          ⚠ Pattern was edited after your last progress save. Row or cell positions may have shifted.
+        </span>
         <button
           type="button"
-          (click)="onSave()"
-          class="rounded-lg bg-indigo-600 text-white text-xs font-medium px-3 py-1.5
-                 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500
-                 focus:ring-offset-1 transition"
+          (click)="staleBannerDismissed.set(true)"
+          class="shrink-0 text-amber-700 hover:text-amber-900 focus:outline-none
+                 focus:ring-2 focus:ring-amber-500 rounded p-0.5 transition"
+          aria-label="Dismiss stale progress warning"
         >
-          Save
+          ✕
         </button>
       </div>
     }
   </header>
 
   <main class="flex-1 flex flex-col min-h-0">
-    <!-- Visually-hidden h1 satisfies page-has-heading-one; reads the pattern name
-         so screen readers announce the page context on arrival. -->
+    <!-- sr-only h1 announces page context to screen readers -->
     <h1 class="sr-only">
-      {{ gridState()?.name ?? 'Loading pattern' }} — Filet Crochet Grid Editor
+      @if (isProgressMode()) {
+        {{ gridState()?.name ?? 'Loading pattern' }} — Filet Crochet Grid (Progress)
+      } @else {
+        {{ gridState()?.name ?? 'Loading pattern' }} — Filet Crochet Grid Editor
+      }
     </h1>
 
     @if (loading()) {
@@ -95,7 +163,8 @@
           <app-grid-col-headers
             [cols]="state.cols"
             [cellSize]="cellSize()"
-            [readonly]="!isEditMode()"
+            [readonly]="!isEditMode() && !isProgressMode()"
+            [progressMode]="isProgressMode()"
             (colClicked)="onColClicked($event)"
           />
         </div>
@@ -107,7 +176,8 @@
             <app-grid-row-headers
               [rows]="state.rows"
               [cellSize]="cellSize()"
-              [readonly]="!isEditMode()"
+              [readonly]="!isEditMode() && !isProgressMode()"
+              [progressMode]="isProgressMode()"
               (rowClicked)="onRowClicked($event)"
             />
           </div>
@@ -119,7 +189,8 @@
             [filledCells]="state.filledCells"
             [cellSize]="cellSize()"
             [zoomLevel]="zoomLevel()"
-            [readonly]="!isEditMode()"
+            [readonly]="!isEditMode() && !isProgressMode()"
+            [highlightedCells]="isProgressMode() ? (progressState()?.highlightedCells ?? emptySet) : emptySet"
             (cellToggled)="onCellToggled($event)"
           />
         </div>
@@ -129,3 +200,43 @@
 
 </div>
 
+<!-- Clear All Progress confirmation dialog -->
+@if (confirmingClearProgress()) {
+  <div
+    cdkTrapFocus
+    cdkTrapFocusAutoCapture
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="clear-progress-dialog-title"
+  >
+    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4">
+      <h3
+        id="clear-progress-dialog-title"
+        class="text-base font-semibold text-gray-900 mb-2"
+      >
+        Clear all progress for "{{ gridState()?.name }}"?
+      </h3>
+      <p class="text-sm text-gray-600 mb-6">This cannot be undone.</p>
+      <div class="flex gap-3 justify-end">
+        <button
+          cdkFocusInitial
+          type="button"
+          (click)="onClearProgressCancel()"
+          class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700
+                 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          (click)="onClearProgressConfirm()"
+          class="rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-medium
+                 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition"
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
+}
