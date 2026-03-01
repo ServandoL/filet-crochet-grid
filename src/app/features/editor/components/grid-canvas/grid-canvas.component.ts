@@ -35,6 +35,7 @@ export class GridCanvasComponent implements OnDestroy {
   readonly cellSize = input<number>(DEFAULT_CELL_SIZE);
   readonly zoomLevel = input<number>(1);
   readonly readonly = input<boolean>(false);
+  readonly highlightedCells = input<Set<string>>(new Set());
 
   // ── Outputs ──────────────────────────────────────────────────────────────
   readonly cellToggled = output<CellPosition>();
@@ -57,8 +58,9 @@ export class GridCanvasComponent implements OnDestroy {
       const cols = this.cols();
       const filledCells = this.filledCells();
       const cellSize = this.cellSize();
+      const highlightedCells = this.highlightedCells();
 
-      void rows; void cols; void filledCells; void cellSize;
+      void rows; void cols; void filledCells; void cellSize; void highlightedCells;
       this.drawGrid();
     });
 
@@ -114,6 +116,17 @@ export class GridCanvasComponent implements OnDestroy {
       ctx.lineTo(width, r * cellSize);
     }
     ctx.stroke();
+
+    // Progress highlight overlay — 2 px inset teal border per highlighted cell
+    const highlighted = this.highlightedCells();
+    if (highlighted.size > 0) {
+      ctx.strokeStyle = '#0f766e'; // teal-700 — meets WCAG AA 3:1 on both white and black
+      ctx.lineWidth = 2;
+      for (const key of highlighted) {
+        const [r, c] = key.split(',').map(Number);
+        ctx.strokeRect(c * cellSize + 2, r * cellSize + 2, cellSize - 4, cellSize - 4);
+      }
+    }
   }
 
   // ── Click hit-test ───────────────────────────────────────────────────────

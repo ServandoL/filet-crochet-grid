@@ -10,12 +10,14 @@ export class GridRowHeadersComponent {
   readonly rows = input.required<number>();
   readonly cellSize = input.required<number>();
   readonly readonly = input<boolean>(false);
+  readonly progressMode = input<boolean>(false);
 
   readonly rowClicked = output<number>();
 
   readonly HEADER_WIDTH = 40;
 
   readonly rowIndices = computed(() => Array.from({ length: this.rows() }, (_, i) => i));
+  readonly buttonSize = computed(() => this.progressMode() ? Math.max(this.cellSize(), 44) : this.cellSize());
 
   onRowClick(row: number): void {
     if (!this.readonly()) this.rowClicked.emit(row);
