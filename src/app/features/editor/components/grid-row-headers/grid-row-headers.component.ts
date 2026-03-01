@@ -9,6 +9,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
 export class GridRowHeadersComponent {
   readonly rows = input.required<number>();
   readonly cellSize = input.required<number>();
+  readonly zoomLevel = input<number>(1);
   readonly readonly = input<boolean>(false);
   readonly progressMode = input<boolean>(false);
 
@@ -17,7 +18,6 @@ export class GridRowHeadersComponent {
   readonly HEADER_WIDTH = 40;
 
   readonly rowIndices = computed(() => Array.from({ length: this.rows() }, (_, i) => i));
-  readonly buttonSize = computed(() => this.cellSize());
 
   onRowClick(row: number): void {
     if (!this.readonly()) this.rowClicked.emit(row);

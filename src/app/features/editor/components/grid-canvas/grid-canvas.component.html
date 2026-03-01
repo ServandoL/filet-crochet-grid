@@ -9,17 +9,22 @@
 -->
 <div
   class="relative origin-top-left touch-none"
-  [style.width.px]="cols() * cellSize()"
-  [style.height.px]="rows() * cellSize()"
-  [style.transform]="'scale(' + zoomLevel() + ')'"
-  [style.transform-origin]="'top left'"
+  [style.width.px]="cols() * cellSize() * zoomLevel()"
+  [style.height.px]="rows() * cellSize() * zoomLevel()"
 >
-  <canvas
-    #canvas
+  <div
+    class="absolute top-0 left-0 origin-top-left"
+    [style.width.px]="cols() * cellSize()"
+    [style.height.px]="rows() * cellSize()"
+    [style.transform]="'scale(' + zoomLevel() + ')'"
+  >
+    <canvas
+      #canvas
     [attr.aria-label]="'Filet crochet grid, ' + rows() + ' rows by ' + cols() + ' columns'"
     role="img"
     class="block"
     (click)="onCanvasClick($event)"
-  ></canvas>
+    ></canvas>
+  </div>
 </div>
 

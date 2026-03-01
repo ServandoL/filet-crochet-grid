@@ -163,6 +163,7 @@
           <app-grid-col-headers
             [cols]="state.cols"
             [cellSize]="cellSize()"
+            [zoomLevel]="zoomLevel()"
             [readonly]="!isEditMode() && !isProgressMode()"
             [progressMode]="isProgressMode()"
             (colClicked)="onColClicked($event)"
@@ -176,6 +177,7 @@
             <app-grid-row-headers
               [rows]="state.rows"
               [cellSize]="cellSize()"
+              [zoomLevel]="zoomLevel()"
               [readonly]="!isEditMode() && !isProgressMode()"
               [progressMode]="isProgressMode()"
               (rowClicked)="onRowClicked($event)"
