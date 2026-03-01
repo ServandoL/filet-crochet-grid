@@ -117,17 +117,32 @@ export class GridCanvasComponent implements OnDestroy {
     }
     ctx.stroke();
 
-    // Progress highlight overlay — 3 px inset border per highlighted cell.
-    // Colour adapts to the cell background so the ring is always legible:
-    //   filled (black) → white   #ffffff  21:1    WCAG AAA
-    //   empty  (white) → teal-700 #0f766e  5.07:1  WCAG AA
+    // Progress highlight overlay — inset border per highlighted cell.
+    // Empty (white) cells: single teal-700 ring (3 px, inset 2 px) — 5.07:1 on white  WCAG AA
+    // Filled (black) cells: double ring to prevent the white ring bleeding into adjacent
+    //   white cells — dark outer halo (2 px, inset 1 px) anchors to fill boundary,
+    //   white inner ring (3 px, inset 4 px) is the highlight — 21:1 on black  WCAG AAA
     const highlighted = this.highlightedCells();
     if (highlighted.size > 0) {
-      ctx.lineWidth = 3;
       for (const key of highlighted) {
         const [r, c] = key.split(',').map(Number);
-        ctx.strokeStyle = filled.has(key) ? '#ffffff' : '#0f766e';
-        ctx.strokeRect(c * cellSize + 2, r * cellSize + 2, cellSize - 4, cellSize - 4);
+        const x = c * cellSize;
+        const y = r * cellSize;
+        if (filled.has(key)) {
+          // Dark outer halo — anchors ring to cell boundary
+          ctx.strokeStyle = '#000000';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x + 2, y + 2, cellSize - 4, cellSize - 4);
+          // White inner ring — the highlight indicator
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(x + 5, y + 5, cellSize - 10, cellSize - 10);
+        } else {
+          // Single teal ring on empty (white) cell
+          ctx.strokeStyle = '#0f766e';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(x + 2, y + 2, cellSize - 4, cellSize - 4);
+        }
       }
     }
   }
