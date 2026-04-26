@@ -5,8 +5,9 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      # Expose on all local-network interfaces on port 80
+      # Expose on all local-network interfaces on port 80 and 443
       - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
     depends_on:
       backend:
         condition: service_healthy
