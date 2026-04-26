@@ -95,13 +95,30 @@ docker compose build frontend
 docker compose up -d frontend
 ```
 
-## 6. Downloading the Certificate
-- The public certificate is available at:
-  - `https://<your-server>/certs/192.168.4.44.pem`
-- You can download it from a browser or with curl/wget:
-  - `curl -k https://<your-server>/certs/192.168.4.44.pem -o 192.168.4.44.pem`
+## 6. Downloading and Installing the Certificate
 
-## 7. (Optional) HTTP to HTTPS Redirect
+To trust your local HTTPS site on other devices, you need to install the public certificate:
+
+### Download the Certificate
+- Open your browser and go to:
+  - `https://localhost/certs/192.168.4.44.pem`
+- Or, from a terminal on the device:
+  - `curl -k https://localhost/certs/192.168.4.44.pem -o 192.168.4.44.pem`
+- If accessing from another device on your network, replace `localhost` with your server's IP address (e.g., `https://192.168.4.44/certs/192.168.4.44.pem`).
+
+### Install the Certificate
+- On most systems, double-clicking the `.pem` file will open the certificate manager and allow you to install it as a trusted certificate.
+- For mobile devices, you may need to email the file to yourself or use AirDrop, then follow your device's instructions to install a CA certificate.
+- For more help, see the [mkcert installation guide](https://github.com/FiloSottile/mkcert#installation).
+
+## 7. Accessing the Website
+- On your local server, open your browser and go to:
+  - `https://localhost/`
+- From another device on your network, use:
+  - `https://<your-server-ip>/`
+- If you see a security warning, make sure the certificate is installed and trusted on your device.
+
+## 8. (Optional) HTTP to HTTPS Redirect
 - Forcing HTTPS is recommended for production. Add a redirect in your `nginx.conf` if needed.
 
 ---
@@ -111,3 +128,4 @@ docker compose up -d frontend
 - nginx is configured for SSL and static asset caching.
 - Both HTTP and HTTPS are exposed.
 - The public cert is downloadable for easy installation on other devices.
+- Access your site at `https://localhost/` or `https://<your-server-ip>/` after installing the certificate.
