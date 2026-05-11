@@ -1,4 +1,4 @@
-import {type DeleteResult, ObjectId, type PushOperator, type UpdateFilter, type WithId} from 'mongodb';
+import {type DeleteResult, ObjectId, type UpdateFilter, type WithId} from 'mongodb';
 import {MongoDatabase} from '../mongo.js';
 import {log} from '../logger.js';
 import type {DbPattern, UpdatePatternDto} from '../types.js';
@@ -29,38 +29,22 @@ export class PatternsService {
   }
 
   public static async patchPattern(id: string, pattern: UpdatePatternDto) {
-    let $set: Partial<DbPattern> = {
+    const $set: Partial<DbPattern> = {
       updatedAt: new Date(),
-    }
-    let $push: PushOperator<DbPattern> = {};
+    };
     if (pattern.name) {
-      $set = {
-        ...$set,
-        name: pattern.name
-      }
+      $set.name = pattern.name;
     }
     if (pattern.cells) {
-      $set = {
-        ...$set,
-        cells: pattern.cells
-      }
+      $set.cells = pattern.cells;
     }
     if (pattern.sectionRowInterval !== undefined) {
-      $set = {
-        ...$set,
-        sectionRowInterval: pattern.sectionRowInterval
-      }
+      $set.sectionRowInterval = pattern.sectionRowInterval;
     }
     if (pattern.sectionColInterval !== undefined) {
-      $set = {
-        ...$set,
-        sectionColInterval: pattern.sectionColInterval
-      }
+      $set.sectionColInterval = pattern.sectionColInterval;
     }
-    const update: UpdateFilter<DbPattern> = {
-      $set,
-      $push
-    }
+    const update: UpdateFilter<DbPattern> = { $set };
     try {
       const updateResult = await MongoDatabase.instance.patterns.updateOne(
         {_id: new ObjectId(id)},

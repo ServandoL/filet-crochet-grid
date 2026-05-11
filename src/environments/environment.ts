@@ -1,6 +1,12 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:80/api',
-  enableLogIn: false
+  apiBaseUrl: 'http://localhost:9000/api',
+  enableLogIn: false,
+  sectionGrid: {
+    /** When true the toolbar shows a popover with editable row/col inputs.
+     *  When false the toolbar shows a simple on/off toggle using the defaults below. */
+    configurable: false,
+    defaultRowInterval: 10,
+    defaultColInterval: 10,
+  },
 };
-

@@ -25,6 +25,7 @@ import {fillCol, fillRow, toggleCell} from '../utils/grid.utils';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {catchError, forkJoin, of} from 'rxjs';
 import {A11yModule} from '@angular/cdk/a11y';
+import {environment} from '../../../../environments/environment';
 
 const DEFAULT_CELL_SIZE = 24;
 
@@ -33,6 +34,9 @@ const DEFAULT_CELL_SIZE = 24;
   imports: [GridCanvasComponent, GridRowHeadersComponent, GridColHeadersComponent, A11yModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './grid-editor.component.html',
+  host: {
+    '(document:click)': 'onDocumentClick()',
+  },
 })
 export class GridEditorComponent implements OnInit {
   // Route inputs (via withComponentInputBinding)
@@ -45,6 +49,14 @@ export class GridEditorComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly titleService = inject(Title);
   private readonly destroy = inject(DestroyRef);
+
+  // ── Environment-driven section grid config ────────────────────────────────
+  /** When true the toolbar renders an editable popover; when false a simple toggle. */
+  protected readonly sectionGridConfigurable = environment.sectionGrid.configurable;
+  private readonly sectionGridDefaults = {
+    rowInterval: environment.sectionGrid.defaultRowInterval,
+    colInterval: environment.sectionGrid.defaultColInterval,
+  };
 
   readonly gridState = signal<GridState | null>(null);
   readonly progressState = signal<ProgressState | null>(null);
@@ -70,7 +82,7 @@ export class GridEditorComponent implements OnInit {
     return ps.patternUpdatedAt > ps.progressUpdatedAt;
   });
 
-  /** Chip label — `⊞ R × C` or `⊞ Off` shown in the toolbar. */
+  /** Chip label — `⊞ R × C` or `⊞ Off` shown in the toolbar (configurable mode only). */
   readonly sectionChipLabel = computed(() => {
     const state = this.gridState();
     if (!state) return 'Off';
@@ -78,6 +90,12 @@ export class GridEditorComponent implements OnInit {
     const c = state.sectionColInterval;
     if (r === 0 && c === 0) return 'Off';
     return `${r} × ${c}`;
+  });
+
+  /** True when section lines are currently active (either interval > 0). */
+  readonly sectionActive = computed(() => {
+    const state = this.gridState();
+    return !!state && (state.sectionRowInterval > 0 || state.sectionColInterval > 0);
   });
 
   ngOnInit(): void {
@@ -206,10 +224,15 @@ export class GridEditorComponent implements OnInit {
     this.zoomLevel.set(zoom);
   }
 
-  // ── Section chip / popover handlers ──────────────────────────────────────
+  // ── Section chip / popover handlers (used when sectionGridConfigurable = true) ──
 
   onSectionChipClick(): void {
     this.sectionPopoverOpen.update((open) => !open);
+  }
+
+  /** Closes the popover when the user clicks anywhere outside the chip wrapper. */
+  onDocumentClick(): void {
+    if (this.sectionPopoverOpen()) this.sectionPopoverOpen.set(false);
   }
 
   closeSectionPopover(): void {
@@ -230,6 +253,23 @@ export class GridEditorComponent implements OnInit {
     if (!state) return;
     const value = Math.max(0, parseInt((event.target as HTMLInputElement).value, 10) || 0);
     const newState = {...state, [field]: value};
+    this.gridState.set(newState);
+    this.saveService.scheduleAutoSave(newState);
+  }
+
+  // ── Section toggle handler (used when sectionGridConfigurable = false) ────
+
+  /** Toggles section lines on (using env defaults) or off. */
+  onSectionToggle(): void {
+    const state = this.gridState();
+    if (!state) return;
+    const newState = this.sectionActive()
+      ? {...state, sectionRowInterval: 0, sectionColInterval: 0}
+      : {
+          ...state,
+          sectionRowInterval: this.sectionGridDefaults.rowInterval,
+          sectionColInterval: this.sectionGridDefaults.colInterval,
+        };
     this.gridState.set(newState);
     this.saveService.scheduleAutoSave(newState);
   }

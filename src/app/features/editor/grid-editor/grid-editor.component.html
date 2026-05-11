@@ -45,85 +45,97 @@
         </div>
       }
 
-      <!-- ⊞ Section chip — visible in all modes -->
-      <div class="relative shrink-0">
-        <button
-          #sectionChipBtn
-          type="button"
-          (click)="onSectionChipClick()"
-          [attr.aria-expanded]="sectionPopoverOpen()"
-          aria-haspopup="dialog"
-          class="flex items-center gap-1 text-xs font-medium text-gray-700 bg-gray-100
-                 hover:bg-gray-200 rounded-lg px-3 min-h-[44px]
-                 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
-        >
-          ⊞ {{ sectionChipLabel() }}
-        </button>
-
-        @if (sectionPopoverOpen()) {
-          <!-- Click-outside backdrop -->
-          <div
-            class="fixed inset-0 z-10"
-            (click)="closeSectionPopover()"
-            aria-hidden="true"
-          ></div>
-
-          <!-- Popover panel -->
-          <div
-            cdkTrapFocus
-            cdkTrapFocusAutoCapture
-            role="dialog"
-            aria-label="Section grid settings"
-            aria-modal="true"
-            (keydown.escape)="closeSectionPopover()"
-            class="absolute top-full left-0 mt-1 z-20 bg-white border border-gray-200
-                   rounded-xl shadow-lg p-4 w-56"
+      <!-- ⊞ Section grid control — visible in all modes -->
+      @if (sectionGridConfigurable) {
+        <!-- Configurable mode: chip + popover with editable row/col inputs -->
+        <div class="relative shrink-0" (click)="$event.stopPropagation()">
+          <button
+            #sectionChipBtn
+            type="button"
+            (click)="onSectionChipClick()"
+            [attr.aria-expanded]="sectionPopoverOpen()"
+            aria-haspopup="dialog"
+            class="flex items-center gap-1 text-xs font-medium rounded-lg px-3 min-h-[44px]
+                   focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+            [class]="sectionActive()
+              ? 'text-green-700 bg-green-100 hover:bg-green-200'
+              : 'text-gray-700 bg-gray-100 hover:bg-gray-200'"
           >
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-700">Section Grid</span>
-                <button
-                  type="button"
-                  (click)="closeSectionPopover()"
-                  class="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2
-                         focus:ring-indigo-500 rounded p-1 min-h-[44px] min-w-[44px] flex items-center justify-center"
-                  aria-label="Close section grid settings"
-                >
-                  ✕
-                </button>
+            ⊞ {{ sectionChipLabel() }}
+          </button>
+
+          @if (sectionPopoverOpen()) {
+            <!-- Popover anchored right-0 to prevent viewport overflow -->
+            <div
+              cdkTrapFocus
+              role="dialog"
+              aria-label="Section grid settings"
+              aria-modal="true"
+              (keydown.escape)="closeSectionPopover()"
+              class="absolute top-full right-0 mt-1 z-20 bg-white border border-gray-200
+                     rounded-xl shadow-lg p-4 w-56"
+            >
+              <div class="flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-gray-700">Section Grid</span>
+                  <button
+                    cdkFocusInitial
+                    type="button"
+                    (click)="closeSectionPopover()"
+                    class="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2
+                           focus:ring-indigo-500 rounded p-1 min-h-[44px] min-w-[44px]
+                           flex items-center justify-center"
+                    aria-label="Close section grid settings"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <label class="flex flex-col gap-1">
+                  <span class="text-xs text-gray-600">Every _ rows</span>
+                  <input
+                    type="number"
+                    min="0"
+                    class="border border-gray-300 rounded px-2 py-2 text-sm w-full
+                           focus:outline-none focus:ring-2 focus:ring-indigo-500
+                           min-h-[44px] disabled:bg-gray-50 disabled:text-gray-400"
+                    [value]="gridState()?.sectionRowInterval ?? 0"
+                    (change)="onSectionRowIntervalChange($event)"
+                  />
+                </label>
+
+                <label class="flex flex-col gap-1">
+                  <span class="text-xs text-gray-600">Every _ cols</span>
+                  <input
+                    type="number"
+                    min="0"
+                    class="border border-gray-300 rounded px-2 py-2 text-sm w-full
+                           focus:outline-none focus:ring-2 focus:ring-indigo-500
+                           min-h-[44px] disabled:bg-gray-50 disabled:text-gray-400"
+                    [value]="gridState()?.sectionColInterval ?? 0"
+                    (change)="onSectionColIntervalChange($event)"
+                  />
+                </label>
               </div>
-
-              <label class="flex flex-col gap-1">
-                <span class="text-xs text-gray-600">Every _ rows</span>
-                <input
-                  type="number"
-                  min="0"
-                  class="border border-gray-300 rounded px-2 py-2 text-sm w-full
-                         focus:outline-none focus:ring-2 focus:ring-indigo-500
-                         min-h-[44px] disabled:bg-gray-50 disabled:text-gray-400"
-                  [value]="gridState()?.sectionRowInterval ?? 0"
-                  [disabled]="!isEditMode() && !isProgressMode()"
-                  (change)="onSectionRowIntervalChange($event)"
-                />
-              </label>
-
-              <label class="flex flex-col gap-1">
-                <span class="text-xs text-gray-600">Every _ cols</span>
-                <input
-                  type="number"
-                  min="0"
-                  class="border border-gray-300 rounded px-2 py-2 text-sm w-full
-                         focus:outline-none focus:ring-2 focus:ring-indigo-500
-                         min-h-[44px] disabled:bg-gray-50 disabled:text-gray-400"
-                  [value]="gridState()?.sectionColInterval ?? 0"
-                  [disabled]="!isEditMode() && !isProgressMode()"
-                  (change)="onSectionColIntervalChange($event)"
-                />
-              </label>
             </div>
-          </div>
-        }
-      </div>
+          }
+        </div>
+      } @else {
+        <!-- Non-configurable mode: simple on/off toggle using env defaults -->
+        <button
+          type="button"
+          (click)="onSectionToggle()"
+          [attr.aria-pressed]="sectionActive()"
+          aria-label="Toggle section grid overlay"
+          class="flex items-center gap-1 text-xs font-medium rounded-lg px-3 min-h-[44px]
+                 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition shrink-0"
+          [class]="sectionActive()
+            ? 'text-green-700 bg-green-100 hover:bg-green-200'
+            : 'text-gray-700 bg-gray-100 hover:bg-gray-200'"
+        >
+          ⊞ Section
+        </button>
+      }
 
       <!-- Mode-specific controls -->
       @if (isEditMode()) {
