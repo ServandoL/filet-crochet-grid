@@ -47,6 +47,8 @@ export function toPatternResponse(pattern: WithId<DbPattern>): Pattern {
     rows: pattern.rows,
     cols: pattern.cols,
     cells: pattern.cells,
+    sectionRowInterval: pattern.sectionRowInterval ?? 0,
+    sectionColInterval: pattern.sectionColInterval ?? 0,
     createdAt: pattern.createdAt.toISOString(),
     updatedAt: pattern.updatedAt.toISOString(),
   }

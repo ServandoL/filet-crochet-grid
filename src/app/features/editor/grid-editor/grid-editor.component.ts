@@ -3,10 +3,12 @@ import {
   Component,
   computed,
   DestroyRef,
+  ElementRef,
   inject,
   input,
   OnInit,
   signal,
+  viewChild,
 } from '@angular/core';
 import {Router} from '@angular/router';
 import {Title} from '@angular/platform-browser';
@@ -51,6 +53,10 @@ export class GridEditorComponent implements OnInit {
   readonly cellSize = signal(DEFAULT_CELL_SIZE);
   readonly staleBannerDismissed = signal(false);
   readonly confirmingClearProgress = signal(false);
+  readonly sectionPopoverOpen = signal(false);
+
+  /** ViewChild ref for the section chip button — used to return focus on popover dismiss. */
+  readonly sectionChipBtnRef = viewChild<ElementRef<HTMLButtonElement>>('sectionChipBtn');
 
   /** Shared empty set — passed to canvas when not in progress mode to avoid new Set() on every render */
   readonly emptySet = new Set<string>();
@@ -62,6 +68,16 @@ export class GridEditorComponent implements OnInit {
     const ps = this.progressState();
     if (!ps || !ps.progressUpdatedAt) return false;
     return ps.patternUpdatedAt > ps.progressUpdatedAt;
+  });
+
+  /** Chip label — `⊞ R × C` or `⊞ Off` shown in the toolbar. */
+  readonly sectionChipLabel = computed(() => {
+    const state = this.gridState();
+    if (!state) return 'Off';
+    const r = state.sectionRowInterval;
+    const c = state.sectionColInterval;
+    if (r === 0 && c === 0) return 'Off';
+    return `${r} × ${c}`;
   });
 
   ngOnInit(): void {
@@ -91,6 +107,8 @@ export class GridEditorComponent implements OnInit {
           rows: pattern.rows,
           cols: pattern.cols,
           filledCells: arrayToFilledSet(pattern.cells),
+          sectionRowInterval: pattern.sectionRowInterval ?? 0,
+          sectionColInterval: pattern.sectionColInterval ?? 0,
         };
         this.gridState.set(state);
         this.progressState.set({
@@ -114,6 +132,8 @@ export class GridEditorComponent implements OnInit {
             rows: pattern.rows,
             cols: pattern.cols,
             filledCells: arrayToFilledSet(pattern.cells),
+            sectionRowInterval: pattern.sectionRowInterval ?? 0,
+            sectionColInterval: pattern.sectionColInterval ?? 0,
           };
           this.gridState.set(state);
           this.loading.set(false);
@@ -184,6 +204,34 @@ export class GridEditorComponent implements OnInit {
   onZoomChange(event: Event): void {
     const zoom = (event as CustomEvent<number>).detail;
     this.zoomLevel.set(zoom);
+  }
+
+  // ── Section chip / popover handlers ──────────────────────────────────────
+
+  onSectionChipClick(): void {
+    this.sectionPopoverOpen.update((open) => !open);
+  }
+
+  closeSectionPopover(): void {
+    this.sectionPopoverOpen.set(false);
+    setTimeout(() => this.sectionChipBtnRef()?.nativeElement.focus(), 0);
+  }
+
+  onSectionRowIntervalChange(event: Event): void {
+    this.updateSectionInterval('sectionRowInterval', event);
+  }
+
+  onSectionColIntervalChange(event: Event): void {
+    this.updateSectionInterval('sectionColInterval', event);
+  }
+
+  private updateSectionInterval(field: 'sectionRowInterval' | 'sectionColInterval', event: Event): void {
+    const state = this.gridState();
+    if (!state) return;
+    const value = Math.max(0, parseInt((event.target as HTMLInputElement).value, 10) || 0);
+    const newState = {...state, [field]: value};
+    this.gridState.set(newState);
+    this.saveService.scheduleAutoSave(newState);
   }
 
   // ── Progress mode handlers ──────────────────────────────────────────────

@@ -14,6 +14,8 @@ export class PatternSaveService {
       this.api.updatePattern(state._id, {
         name: state.name,
         cells: filledSetToArray(state.filledCells),
+        sectionRowInterval: state.sectionRowInterval,
+        sectionColInterval: state.sectionColInterval,
       }),
     inject(DestroyRef),
   );

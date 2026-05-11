@@ -15,7 +15,7 @@
 
       <div class="h-5 w-px bg-gray-200"></div>
 
-      <!-- Edit mode: inline editable name -->
+      <!-- Name: editable in edit mode, read-only otherwise -->
       @if (isEditMode()) {
         <input
           type="text"
@@ -26,13 +26,107 @@
           (input)="onNameChange($event)"
           aria-label="Pattern name"
         />
+      } @else {
+        <span class="flex-1 text-sm font-semibold text-gray-900 truncate px-1">
+          {{ gridState()?.name }}
+        </span>
+      }
 
-        <!-- Edit save status aria-live -->
+      <!-- Aria-live status region (mode-appropriate) -->
+      @if (isEditMode()) {
         <div aria-live="polite" aria-atomic="true" class="sr-only">
           @if (saveService.saveStatus() === 'saved') { Saved. }
           @if (saveService.saveStatus() === 'error') { Save failed. }
         </div>
+      } @else if (isProgressMode()) {
+        <div aria-live="polite" aria-atomic="true" class="sr-only">
+          @if (progressSaveService.saveStatus() === 'saved') { Progress saved. }
+          @if (progressSaveService.saveStatus() === 'error') { Progress save failed. }
+        </div>
+      }
 
+      <!-- ⊞ Section chip — visible in all modes -->
+      <div class="relative shrink-0">
+        <button
+          #sectionChipBtn
+          type="button"
+          (click)="onSectionChipClick()"
+          [attr.aria-expanded]="sectionPopoverOpen()"
+          aria-haspopup="dialog"
+          class="flex items-center gap-1 text-xs font-medium text-gray-700 bg-gray-100
+                 hover:bg-gray-200 rounded-lg px-3 min-h-[44px]
+                 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+        >
+          ⊞ {{ sectionChipLabel() }}
+        </button>
+
+        @if (sectionPopoverOpen()) {
+          <!-- Click-outside backdrop -->
+          <div
+            class="fixed inset-0 z-10"
+            (click)="closeSectionPopover()"
+            aria-hidden="true"
+          ></div>
+
+          <!-- Popover panel -->
+          <div
+            cdkTrapFocus
+            cdkTrapFocusAutoCapture
+            role="dialog"
+            aria-label="Section grid settings"
+            aria-modal="true"
+            (keydown.escape)="closeSectionPopover()"
+            class="absolute top-full left-0 mt-1 z-20 bg-white border border-gray-200
+                   rounded-xl shadow-lg p-4 w-56"
+          >
+            <div class="flex flex-col gap-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-gray-700">Section Grid</span>
+                <button
+                  type="button"
+                  (click)="closeSectionPopover()"
+                  class="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2
+                         focus:ring-indigo-500 rounded p-1 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  aria-label="Close section grid settings"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <label class="flex flex-col gap-1">
+                <span class="text-xs text-gray-600">Every _ rows</span>
+                <input
+                  type="number"
+                  min="0"
+                  class="border border-gray-300 rounded px-2 py-2 text-sm w-full
+                         focus:outline-none focus:ring-2 focus:ring-indigo-500
+                         min-h-[44px] disabled:bg-gray-50 disabled:text-gray-400"
+                  [value]="gridState()?.sectionRowInterval ?? 0"
+                  [disabled]="!isEditMode() && !isProgressMode()"
+                  (change)="onSectionRowIntervalChange($event)"
+                />
+              </label>
+
+              <label class="flex flex-col gap-1">
+                <span class="text-xs text-gray-600">Every _ cols</span>
+                <input
+                  type="number"
+                  min="0"
+                  class="border border-gray-300 rounded px-2 py-2 text-sm w-full
+                         focus:outline-none focus:ring-2 focus:ring-indigo-500
+                         min-h-[44px] disabled:bg-gray-50 disabled:text-gray-400"
+                  [value]="gridState()?.sectionColInterval ?? 0"
+                  [disabled]="!isEditMode() && !isProgressMode()"
+                  (change)="onSectionColIntervalChange($event)"
+                />
+              </label>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Mode-specific controls -->
+      @if (isEditMode()) {
         <div class="flex items-center gap-2 shrink-0">
           @if (saveService.saveStatus() === 'saving') {
             <span class="text-xs text-gray-500">Saving…</span>
@@ -57,20 +151,10 @@
           </button>
         </div>
 
-      <!-- Progress mode: read-only name + progress controls -->
       } @else if (isProgressMode()) {
-        <span class="flex-1 text-sm font-semibold text-gray-900 truncate px-1">
-          {{ gridState()?.name }}
-        </span>
         <span class="text-xs text-white bg-teal-700 rounded px-2 py-0.5 shrink-0">
           Track Progress
         </span>
-
-        <!-- Progress save status aria-live -->
-        <div aria-live="polite" aria-atomic="true" class="sr-only">
-          @if (progressSaveService.saveStatus() === 'saved') { Progress saved. }
-          @if (progressSaveService.saveStatus() === 'error') { Progress save failed. }
-        </div>
 
         <div class="flex items-center gap-2 shrink-0">
           @if (progressSaveService.saveStatus() === 'saving') {
@@ -105,12 +189,8 @@
           </button>
         </div>
 
-      <!-- View mode: read-only badge -->
       } @else {
-        <span class="flex-1 text-sm font-semibold text-gray-900 truncate px-1">
-          {{ gridState()?.name }}
-        </span>
-        <span class="text-xs text-gray-700 bg-gray-100 rounded px-2 py-0.5">
+        <span class="text-xs text-gray-700 bg-gray-100 rounded px-2 py-0.5 shrink-0">
           Viewing — Read Only
         </span>
       }
@@ -193,6 +273,8 @@
             [zoomLevel]="zoomLevel()"
             [readonly]="!isEditMode() && !isProgressMode()"
             [highlightedCells]="isProgressMode() ? (progressState()?.highlightedCells ?? emptySet) : emptySet"
+            [sectionRowInterval]="state.sectionRowInterval"
+            [sectionColInterval]="state.sectionColInterval"
             (cellToggled)="onCellToggled($event)"
           />
         </div>

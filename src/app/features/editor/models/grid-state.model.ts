@@ -13,5 +13,7 @@ export interface GridState {
   rows: number;
   cols: number;
   filledCells: Set<string>;
+  sectionRowInterval: number;
+  sectionColInterval: number;
 }
 

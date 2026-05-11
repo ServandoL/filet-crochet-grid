@@ -36,6 +36,8 @@ export class GridCanvasComponent implements OnDestroy {
   readonly zoomLevel = input<number>(1);
   readonly readonly = input<boolean>(false);
   readonly highlightedCells = input<Set<string>>(new Set());
+  readonly sectionRowInterval = input<number>(0);
+  readonly sectionColInterval = input<number>(0);
 
   // ── Outputs ──────────────────────────────────────────────────────────────
   readonly cellToggled = output<CellPosition>();
@@ -59,8 +61,11 @@ export class GridCanvasComponent implements OnDestroy {
       const filledCells = this.filledCells();
       const cellSize = this.cellSize();
       const highlightedCells = this.highlightedCells();
+      const sectionRowInterval = this.sectionRowInterval();
+      const sectionColInterval = this.sectionColInterval();
 
       void rows; void cols; void filledCells; void cellSize; void highlightedCells;
+      void sectionRowInterval; void sectionColInterval;
       this.drawGrid();
     });
 
@@ -95,6 +100,9 @@ export class GridCanvasComponent implements OnDestroy {
     // Background
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, width, height);
+
+    // Section grid lines — horizontal and vertical lines at interval boundaries
+    this.drawSectionLines(ctx, rows, cols, cellSize);
 
     // Filled cells
     ctx.fillStyle = '#000000';
@@ -145,6 +153,41 @@ export class GridCanvasComponent implements OnDestroy {
         }
       }
     }
+  }
+
+  private drawSectionLines(ctx: CanvasRenderingContext2D, rows: number, cols: number, cellSize: number): void {
+    const rowInterval = this.sectionRowInterval();
+    const colInterval = this.sectionColInterval();
+    if (rowInterval === 0 && colInterval === 0) return;
+
+    const width = cols * cellSize;
+    const height = rows * cellSize;
+
+    ctx.save();
+    ctx.strokeStyle = '#16a34a'; // green-600 — high contrast on both white and black cells
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+
+    // Horizontal lines at every rowInterval boundary
+    if (rowInterval > 0) {
+      for (let r = rowInterval; r < rows; r += rowInterval) {
+        const y = r * cellSize;
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+      }
+    }
+
+    // Vertical lines at every colInterval boundary
+    if (colInterval > 0) {
+      for (let c = colInterval; c < cols; c += colInterval) {
+        const x = c * cellSize;
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+      }
+    }
+
+    ctx.stroke();
+    ctx.restore();
   }
 
   // ── Click hit-test ───────────────────────────────────────────────────────

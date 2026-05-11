@@ -7,6 +7,8 @@ export interface Pattern {
   rows: number;
   cols: number;
   cells: FilledCell[];
+  sectionRowInterval: number;
+  sectionColInterval: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -16,6 +18,8 @@ export interface DbPattern {
   rows: number;
   cols: number;
   cells: FilledCell[];
+  sectionRowInterval?: number;
+  sectionColInterval?: number;
   updatedAt: Date;
   createdAt: Date;
 }
@@ -29,6 +33,8 @@ export interface CreatePatternDto {
 export interface UpdatePatternDto {
   name?: string | undefined;
   cells?: FilledCell[] | undefined;
+  sectionRowInterval?: number | undefined;
+  sectionColInterval?: number | undefined;
 }
 
 export interface DbProgress {

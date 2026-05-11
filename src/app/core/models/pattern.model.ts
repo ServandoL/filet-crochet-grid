@@ -6,6 +6,8 @@ export interface Pattern {
   rows: number;
   cols: number;
   cells: FilledCell[];
+  sectionRowInterval?: number;
+  sectionColInterval?: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -19,6 +21,8 @@ export interface CreatePatternDto {
 export interface UpdatePatternDto {
   name?: string;
   cells?: FilledCell[];
+  sectionRowInterval?: number;
+  sectionColInterval?: number;
 }
 
 /** Progress tracking — satellite document; _id matches the parent Pattern._id */

@@ -45,6 +45,18 @@ export class PatternsService {
         cells: pattern.cells
       }
     }
+    if (pattern.sectionRowInterval !== undefined) {
+      $set = {
+        ...$set,
+        sectionRowInterval: pattern.sectionRowInterval
+      }
+    }
+    if (pattern.sectionColInterval !== undefined) {
+      $set = {
+        ...$set,
+        sectionColInterval: pattern.sectionColInterval
+      }
+    }
     const update: UpdateFilter<DbPattern> = {
       $set,
       $push

@@ -19,6 +19,8 @@ export type Pattern = z.infer<typeof PatternSchema>;
 export const PatternPatchSchema = z.object({
   name: z.string().optional(),
   cells: z.array(FilledCellSchema).optional(),
+  sectionRowInterval: z.number().int().optional().default(0),
+  sectionColInterval: z.number().int().optional().default(0),
 });
 
 export const UpsertProgressSchema = z.object({
