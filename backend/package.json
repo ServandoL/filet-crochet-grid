@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "prestart": "npx tsc -p ./tsconfig.json",
+    "build": "npx tsc -p ./tsconfig.json",
     "start": "node --env-file=.env dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
