@@ -82,7 +82,7 @@ On a non-touch device the system SHALL allow the user to scroll the grid contain
 ---
 
 ### Requirement: Mobile users can pinch-to-zoom and pan the grid
-On a touch device the system SHALL support pinch-to-zoom (two-finger pinch) to scale the canvas and two-finger drag to pan. A single-finger tap SHALL toggle cells. A single-finger drag SHALL scroll the container natively.
+On a touch device the system SHALL support pinch-to-zoom (two-finger pinch) to scale the canvas and two-finger drag to pan. A single-finger tap SHALL toggle cells exactly once. A single-finger drag SHALL scroll the container natively. The touch handler SHALL call `preventDefault()` on the `touchend` event for a recognised tap to suppress the browser's synthetic `click` event and prevent double-toggling.
 
 #### Scenario: Pinch-to-zoom on mobile
 - **WHEN** the user performs a two-finger pinch gesture on the canvas
@@ -92,9 +92,13 @@ On a touch device the system SHALL support pinch-to-zoom (two-finger pinch) to s
 - **WHEN** the user performs a two-finger drag on the canvas after zooming
 - **THEN** the grid container SHALL pan to follow the gesture
 
-#### Scenario: Single-finger tap on mobile toggles a cell
+#### Scenario: Single-finger tap on mobile toggles a cell exactly once
 - **WHEN** the user taps a cell with a single finger without dragging
-- **THEN** the cell fill state SHALL toggle
+- **THEN** the cell fill state SHALL toggle exactly once (the cell SHALL be filled if it was empty, or empty if it was filled)
+
+#### Scenario: Single-finger tap does not fire a redundant click event
+- **WHEN** the user taps a cell with a single finger on a mobile browser
+- **THEN** only one `cellToggled` emission SHALL occur and the browser's synthetic `click` event SHALL be suppressed
 
 ---
 
@@ -108,6 +112,23 @@ The editor toolbar SHALL display the current pattern name. In view mode it SHALL
 #### Scenario: User edits pattern name in edit mode
 - **WHEN** the user edits the inline name field in edit mode and the change is saved
 - **THEN** the updated name SHALL be persisted via the save mechanism
+
+---
+
+### Requirement: Editor supports a third progress tracking mode
+The editor SHALL accept `?mode=progress` as a valid mode value. In progress mode the pattern SHALL be displayed read-only and all highlight interactions SHALL operate on the progress overlay, not the pattern design. Row and column header buttons SHALL use the same cell size as the canvas in all modes so that axis labels remain aligned with the grid.
+
+#### Scenario: Editor loads in progress mode
+- **WHEN** the user navigates to `/patterns/:id?mode=progress`
+- **THEN** the editor SHALL load the pattern, fetch any saved progress, and render the grid with highlights overlaid. The pattern name SHALL be read-only. The Save and name-edit controls SHALL be replaced by progress-mode controls.
+
+#### Scenario: Pattern cells are not interactive in progress mode
+- **WHEN** the editor is in progress mode and the user taps a cell
+- **THEN** the cell's pattern fill state SHALL NOT change; only the progress highlight SHALL toggle
+
+#### Scenario: Row and column headers are aligned with the canvas in progress mode
+- **WHEN** the editor is in progress mode
+- **THEN** each row header button SHALL be exactly `cellSize` pixels tall and each column header button SHALL be exactly `cellSize` pixels wide, matching the canvas cell dimensions so that labels align with their corresponding rows and columns
 
 ---
 

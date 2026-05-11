@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:9000/api',
+  apiBaseUrl: 'http://localhost:80/api',
   enableLogIn: false
 };
 

@@ -57,6 +57,15 @@ Each pattern card SHALL include a Delete button. Tapping Delete SHALL open a con
 
 ---
 
+### Requirement: Pattern card provides Progress action
+Each pattern card SHALL include a Progress button that navigates to the grid editor in progress tracking mode.
+
+#### Scenario: User taps Progress
+- **WHEN** the user taps the Progress button on a pattern card
+- **THEN** the system SHALL navigate to `/patterns/:id?mode=progress`
+
+---
+
 ### Requirement: User can navigate to create a new pattern
 The pattern list SHALL include a "New Pattern" button that navigates to `/patterns/new`.
 
