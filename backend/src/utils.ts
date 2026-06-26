@@ -12,31 +12,35 @@ export function toError(error: Error | undefined) {
 }
 
 export async function traceHeaders(koa: Koa.Context, next: Koa.Next) {
-  // Only log essential headers and sanitize body to avoid serialization issues
-  const sanitizedHeaders: Record<string, string | string[] | undefined> = {
-    'content-type': koa.request.headers['content-type'],
-    'authorization': koa.request.headers['authorization'] ? '[REDACTED]' : undefined,
-  };
+  // Simple approach: stringify headers and body for logging. Use try/catch
+  // to avoid throwing on circular structures; fall back to a small note.
+  let headersStr: string;
+  try {
+    // Redact authorization and cookie headers before stringify
+    const raw = { ...koa.request.headers } as Record<string, unknown>;
+    if (raw['authorization']) raw['authorization'] = '[REDACTED]';
+    if (raw['cookie']) raw['cookie'] = '[REDACTED]';
+    headersStr = JSON.stringify(raw);
+  } catch (e) {
+    headersStr = '"[unserializable headers]"';
+  }
 
-  // Safely log body - skip if it's a buffer or large object
-  let bodyLog: unknown;
-  if (koa.request.body) {
-    if (Buffer.isBuffer(koa.request.body)) {
-      bodyLog = '[Buffer]';
-    } else if (typeof koa.request.body === 'object') {
-      // Only log the keys for large objects
-      bodyLog = Object.keys(koa.request.body);
-    } else {
-      bodyLog = koa.request.body;
+  let bodyStr: string | undefined = undefined;
+  try {
+    if (koa.request.body !== undefined) {
+      bodyStr = JSON.stringify(koa.request.body);
     }
+  } catch (e) {
+    bodyStr = '"[unserializable body]"';
   }
 
   log.info({
     method: koa.request.method,
     url: koa.request.url,
-    headers: sanitizedHeaders,
-    bodyKeys: bodyLog
-  })
+    headers: headersStr,
+    body: bodyStr,
+  });
+
   await next();
 }
 
