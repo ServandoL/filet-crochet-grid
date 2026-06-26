@@ -12,9 +12,30 @@ export function toError(error: Error | undefined) {
 }
 
 export async function traceHeaders(koa: Koa.Context, next: Koa.Next) {
+  // Only log essential headers and sanitize body to avoid serialization issues
+  const sanitizedHeaders: Record<string, string | string[] | undefined> = {
+    'content-type': koa.request.headers['content-type'],
+    'authorization': koa.request.headers['authorization'] ? '[REDACTED]' : undefined,
+  };
+
+  // Safely log body - skip if it's a buffer or large object
+  let bodyLog: unknown;
+  if (koa.request.body) {
+    if (Buffer.isBuffer(koa.request.body)) {
+      bodyLog = '[Buffer]';
+    } else if (typeof koa.request.body === 'object') {
+      // Only log the keys for large objects
+      bodyLog = Object.keys(koa.request.body);
+    } else {
+      bodyLog = koa.request.body;
+    }
+  }
+
   log.info({
-    headers: koa.request.headers,
-    body: koa.request.body
+    method: koa.request.method,
+    url: koa.request.url,
+    headers: sanitizedHeaders,
+    bodyKeys: bodyLog
   })
   await next();
 }
