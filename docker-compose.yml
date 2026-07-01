@@ -21,21 +21,15 @@ services:
       dockerfile: Dockerfile    # the Dockerfile we added at repo root
     expose:
       - "9000"                  # allow other services on the same docker network to reach port 9000
+    env_file:
+      - .env                      # convenience: inject all variables from .env into the container
     environment:
-      # Tell the Spring Boot container to bind to port 9000 (so nginx can keep using 9000)
-      - SERVER_PORT=9000
-
-      # Mongo configuration - map the env names to what the Spring app expects
-      - MONGO_URI=${MONGO_URI}                       # e.g. mongodb://user:pass@mongo:27017/production
-      - MONGO_DB=${MONGO_DB_NAME:-filet-crochet-grid}
-
-      # Optional: JWT secret (kept for compatibility) and JVM opts
+      - SERVER_PORT=${SERVER_PORT:-9000}
+      - MONGO_URI=${MONGO_URI}                                  # spring.data.mongodb.uri -> ${MONGO_URI}
+      - MONGO_DB=${MONGO_DB_NAME:-filet-crochet-grid}           # spring.data.mongodb.database -> ${MONGO_DB}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:4200,http://localhost:5173}
       - JWT_SECRET=${JWT_SECRET}
       - JAVA_OPTS=${JAVA_OPTS:-}
-
-      # Optional: override CORS allowed origins if needed (app reads app.cors.allowed-origins from CORS_ORIGINS)
-      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:4200,http://localhost:5173}
-
     healthcheck:
       test: [ "CMD-SHELL", "wget -qO- http://localhost:9000/actuator/health || exit 1" ]
       interval: 10s
