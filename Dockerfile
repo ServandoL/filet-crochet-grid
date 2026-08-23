@@ -6,7 +6,7 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build -- --configuration production
+RUN npm run build
 
 # ── Stage 2: serve with nginx ────────────────────────────────────────────────
 #FROM nginx:1.27-alpine

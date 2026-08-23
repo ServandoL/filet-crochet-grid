@@ -6,7 +6,7 @@ import {CreatePatternDto, Pattern, Progress, UpdatePatternDto, UpsertProgressDto
 @Injectable({providedIn: 'root'})
 export class PatternApiService {
   private readonly http = inject(HttpClient);
-  private readonly base = `${environment.apiBaseUrl}/patterns`;
+  private readonly base = `${environment.apiBaseUrl}/api/patterns`;
 
   getPatterns() {
     return this.http.get<Pattern[]>(this.base);
