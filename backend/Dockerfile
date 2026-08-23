@@ -17,7 +17,7 @@ RUN npm ci --omit=dev
 
 COPY --from=builder /app/dist ./dist
 
-EXPOSE 9000
+EXPOSE 9002
 # Environment variables are supplied by docker-compose (not a .env file).
 CMD ["node", "dist/server.js"]
 

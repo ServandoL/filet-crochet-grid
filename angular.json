@@ -53,7 +53,9 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "optimization": true,
+              "baseHref": "/filet-crochet/"
             },
             "development": {
               "optimization": false,

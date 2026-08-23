@@ -119,7 +119,7 @@ To trust your local HTTPS site on other devices, you need to install the public 
 - If you see a security warning, make sure the certificate is installed and trusted on your device.
 
 ## 8. (Optional) HTTP to HTTPS Redirect
-- Forcing HTTPS is recommended for production. Add a redirect in your `nginx.conf` if needed.
+- Forcing HTTPS is recommended for production. Add a redirect in your `default.conf` if needed.
 
 ---
 

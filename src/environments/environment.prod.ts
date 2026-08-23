@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiBaseUrl: '/api',
+  apiBaseUrl: '/api/v1/filet-crochet',
   enableLogIn: false,
   sectionGrid: {
     /** When true the toolbar shows a popover with editable row/col inputs.
