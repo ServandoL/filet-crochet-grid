@@ -1,59 +1,40 @@
-# FiletCrochetGrid
+# Filet Crochet Grid
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.4.
+A full-stack editor for filet crochet patterns: design a grid pattern, save it,
+and track your progress stitch by stitch as you work it.
 
-## Development server
+## What it does
+- Interactive grid editor (canvas-based) with row/column headers, section
+  overlays, and filled / empty / no-stitch cells
+- Pattern create, list, and save flows, with unsaved-changes protection
+- Progress tracking mode that highlights where you are in the pattern
+- Auth with route guards and an HTTP auth interceptor
 
-To start a local development server, run:
+## Architecture
+- **Frontend:** Angular 21, TypeScript, standalone components, feature-based
+  structure (`core/` services and guards, `features/` editor and patterns)
+- **Backend (in this repo):** Koa 3 + TypeScript (ESM), MongoDB driver,
+  Zod schemas for validation, Winston logging, rate limiting
+- **Backend (Spring Boot version):** the same API is also implemented in Java —
+  see [filet-crochet-sb](https://github.com/ServandoL/filet-crochet-sb)
+- **Deployment:** multi-stage Docker build, nginx serves the SPA and proxies
+  `/api`, docker-compose wires frontend + backend
 
+## Developed spec-first
+Features are designed before they are built. Proposals, designs, specs, and
+task lists live under `openspec/` (OpenSpec), including the archived history of
+shipped changes — start there to see how a feature evolved.
+
+## Running locally
 ```bash
-ng serve
+npm install
+npm start            # Angular dev server on http://localhost:4200
+# backend
+cd backend && npm install && npm run build && npm start
+# or the full stack
+docker compose up --build
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Tests
+Angular unit specs cover the grid canvas, grid editor, and grid utilities
+(`*.spec.ts` alongside the code). Run with `npm test`.
