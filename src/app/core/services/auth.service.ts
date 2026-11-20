@@ -16,11 +16,23 @@ interface LoginResponse {
 
 const TOKEN_KEY = 'fcg_auth_token';
 
+/**
+ * The saved token, or null when storage is unavailable or blocked. The auth interceptor reads it
+ * on every request, so a throw here would fail every request in the app.
+ */
+function readToken(): string | null {
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
 
-  private readonly _token = signal<string | null>(localStorage.getItem(TOKEN_KEY));
+  private readonly _token = signal<string | null>(readToken());
   private readonly _currentUser = signal<User | null>(null);
 
   readonly isAuthenticated = computed(() => this._token() !== null);
@@ -31,7 +43,11 @@ export class AuthService {
       .post<LoginResponse>(`${environment.apiBaseUrl}/auth/login`, { email, password })
       .pipe(
         tap((res) => {
-          localStorage.setItem(TOKEN_KEY, res.token);
+          try {
+            localStorage.setItem(TOKEN_KEY, res.token);
+          } catch {
+            // Signed in for this visit only.
+          }
           this._token.set(res.token);
           this._currentUser.set(res.user);
         }),
@@ -39,7 +55,11 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem(TOKEN_KEY);
+    try {
+      localStorage.removeItem(TOKEN_KEY);
+    } catch {
+      // Nothing saved to remove.
+    }
     this._token.set(null);
     this._currentUser.set(null);
   }
