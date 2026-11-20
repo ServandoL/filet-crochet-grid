@@ -1,0 +1,10 @@
+{
+  "/filet-crochet-api": {
+    "target": "http://localhost:9010",
+    "pathRewrite": { "^/filet-crochet-api": "" }
+  },
+  "/household-api": {
+    "target": "http://localhost:9020",
+    "pathRewrite": { "^/household-api": "" }
+  }
+}

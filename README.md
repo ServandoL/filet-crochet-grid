@@ -11,7 +11,7 @@ and track your progress stitch by stitch as you work it.
 - Auth with route guards and an HTTP auth interceptor
 
 ## Architecture
-- **Frontend:** Angular 21, TypeScript, standalone components, feature-based
+- **Frontend:** Angular 22, TypeScript, standalone components, feature-based
   structure (`core/` services and guards, `features/` editor and patterns)
 - **Backend (in this repo):** Koa 3 + TypeScript (ESM), MongoDB driver,
   Zod schemas for validation, Winston logging, rate limiting
@@ -19,6 +19,18 @@ and track your progress stitch by stitch as you work it.
   see [filet-crochet-sb](https://github.com/ServandoL/filet-crochet-sb)
 - **Deployment:** multi-stage Docker build, nginx serves the SPA and proxies
   `/api`, docker-compose wires frontend + backend
+
+## Households and the API
+On the home server every pattern belongs to a household, shared with the other home apps and managed
+in Home (`/household`). The app is wrapped in `HouseholdGateComponent` from `@home/ui/household`: it
+loads `/household-api/api/v1/me`, picks your household (or asks, if you're in several), and only
+then renders the routes. `householdInterceptor` adds `X-Household-Id` to every crochet call. Only the
+household entry point and `theme.css` (for the picker) are used, not the `@home/ui` shell, so the app
+keeps its own layout.
+
+`ng serve` proxies `/filet-crochet-api` to the Spring Boot API on `localhost:9010` and
+`/household-api` to household-api on `localhost:9020` (`proxy.conf.json`), as nginx does on the home
+server.
 
 ## Developed spec-first
 Features are designed before they are built. Proposals, designs, specs, and
