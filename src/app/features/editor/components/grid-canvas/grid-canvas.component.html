@@ -7,8 +7,9 @@
   anchored without any JS scroll-event wiring — making JS scroll-sync (tasks 11.4/12.4)
   unnecessary. This is a deliberate architectural decision (see design.md Decision #1).
 -->
+<!-- The grid stays paper-colored in every theme; the ring frames it on dark backgrounds. -->
 <div
-  class="relative origin-top-left touch-pan-x touch-pan-y"
+  class="relative origin-top-left touch-pan-x touch-pan-y ring-1 ring-[var(--theme-border)]"
   [style.width.px]="cols() * cellSize() * zoomLevel()"
   [style.height.px]="rows() * cellSize() * zoomLevel()"
 >
