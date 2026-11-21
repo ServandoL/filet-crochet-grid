@@ -23,7 +23,8 @@ import {ProgressState} from '../models/progress-state.model';
 import {arrayToFilledSet} from '../../../core/models/pattern.model';
 import {fillCol, fillRow, toggleCell} from '../utils/grid.utils';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {catchError, forkJoin, of} from 'rxjs';
+import {catchError, debounceTime, filter, forkJoin, merge, of} from 'rxjs';
+import {HouseholdChange, HouseholdEvents} from '@home/ui/realtime';
 import {A11yModule} from '@angular/cdk/a11y';
 import {environment} from '../../../../environments/environment';
 
@@ -49,6 +50,7 @@ export class GridEditorComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly titleService = inject(Title);
   private readonly destroy = inject(DestroyRef);
+  private readonly events = inject(HouseholdEvents);
 
   // ── Environment-driven section grid config ────────────────────────────────
   /** When true the toolbar renders an editable popover; when false a simple toggle. */
@@ -105,6 +107,35 @@ export class GridEditorComponent implements OnInit {
     this.progressSaveService.isDirty.set(false);
     this.progressSaveService.saveStatus.set('idle');
 
+    this.load(false);
+    this.followOtherDevices();
+  }
+
+  /**
+   * Another device changed or deleted this pattern or its progress, or the stream reconnected.
+   * Unsaved edits here win: the reload waits for them, and their autosave replaces the other
+   * device's change.
+   */
+  private followOtherDevices(): void {
+    const thisPattern = filter((change: HouseholdChange) => change.id === this.id());
+    const changes = merge(this.events.on('patterns'), this.events.on('progress')).pipe(thisPattern);
+    changes
+      .pipe(
+        filter((change) => change.resource === 'patterns' && change.action === 'deleted'),
+        takeUntilDestroyed(this.destroy),
+      )
+      .subscribe(() => void this.router.navigate(['/patterns']));
+    merge(changes.pipe(filter((change) => change.action !== 'deleted' || change.resource === 'progress')), this.events.resync)
+      .pipe(debounceTime(250), takeUntilDestroyed(this.destroy))
+      .subscribe(() => {
+        const saving = this.isProgressMode() ? this.progressSaveService : this.saveService;
+        if (saving.isDirty() || saving.saveStatus() === 'saving') return;
+        this.load(true);
+      });
+  }
+
+  /** Loads the pattern (and its progress). A refresh that fails keeps what's on screen. */
+  private load(refresh: boolean): void {
     if (this.isProgressMode()) {
       // Parallel load: pattern + progress
       forkJoin({
@@ -117,7 +148,7 @@ export class GridEditorComponent implements OnInit {
           return of(null);
         }),
       ).subscribe((result) => {
-        if (!result) { void this.router.navigate(['/patterns']); return; }
+        if (!result) { if (!refresh) void this.router.navigate(['/patterns']); return; }
         const {pattern, progress} = result;
         const state: GridState = {
           _id: pattern._id,
@@ -156,7 +187,7 @@ export class GridEditorComponent implements OnInit {
           this.gridState.set(state);
           this.loading.set(false);
           this.titleService.setTitle(`${pattern.name} — Filet Crochet Grid`);
-        } else {
+        } else if (!refresh) {
           void this.router.navigate(['/patterns']);
         }
       });

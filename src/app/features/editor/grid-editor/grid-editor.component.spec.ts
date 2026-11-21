@@ -4,12 +4,15 @@ import { GridEditorComponent } from './grid-editor.component';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HouseholdEvents } from '@home/ui/realtime';
+import { EMPTY } from 'rxjs';
 
 describe('GridEditorComponent — sectionChipLabel', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [GridEditorComponent],
       providers: [
+        { provide: HouseholdEvents, useValue: { changes: EMPTY, resync: EMPTY, on: () => EMPTY } },
         provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting(),

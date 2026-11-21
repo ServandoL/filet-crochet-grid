@@ -5,8 +5,9 @@ import {PatternApiService} from '../../../core/services/pattern-api.service';
 import {PatternCardComponent} from '../pattern-card/pattern-card.component';
 import {Pattern} from '../../../core/models/pattern.model';
 import {toSignal} from '@angular/core/rxjs-interop';
-import {catchError, of, startWith} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {catchError, debounceTime, EMPTY, merge, of, startWith} from 'rxjs';
+import {switchMap} from 'rxjs/operators';
+import {HouseholdEvents} from '@home/ui/realtime';
 import {AuthService} from '../../../core/services/auth.service';
 import {environment} from '../../../../environments/environment';
 
@@ -21,12 +22,16 @@ export class PatternListComponent implements OnInit {
   protected readonly router = inject(Router);
   private readonly titleService = inject(Title);
   private readonly auth = inject(AuthService);
+  private readonly events = inject(HouseholdEvents);
   public env = environment;
 
-  // Stream emits null while loading, then the pattern array (or [] on error).
-  private readonly patterns$ = this.api.getPatterns().pipe(
-    map((list) => list),
-    catchError(() => of([] as Pattern[])),
+  // Stream emits null while loading, then the pattern array (or [] on error). It refetches when
+  // another device changes a pattern or the event stream reconnects; a failed refetch keeps the list.
+  private readonly patterns$ = merge(
+    of(undefined),
+    merge(this.events.on('patterns'), this.events.resync).pipe(debounceTime(250)),
+  ).pipe(
+    switchMap((_, i) => this.api.getPatterns().pipe(catchError(() => (i === 0 ? of([] as Pattern[]) : EMPTY)))),
     startWith(null),
   );
 
