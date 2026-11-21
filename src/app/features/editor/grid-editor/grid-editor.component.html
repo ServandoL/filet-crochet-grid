@@ -1,33 +1,30 @@
-<div class="flex flex-col flex-1 min-h-0 bg-white">
+<div class="flex flex-col flex-1 min-h-0 app-surface">
 
-  <!-- Toolbar -->
-  <header class="flex flex-col border-b border-gray-200 bg-white shrink-0 z-10">
-    <div class="flex items-center gap-3 px-4 py-2">
+  <!-- Toolbar. On phones the tools wrap to a second line, which the chevron collapses. -->
+  <header class="flex flex-col border-b app-border app-surface shrink-0 z-10">
+    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 px-2 sm:px-4 py-1">
       <button
         type="button"
         (click)="onBack()"
-        class="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900
-               focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded px-2 py-1 transition"
+        class="app-icon-button focus-ring flex items-center justify-center rounded-lg min-h-[44px] min-w-[44px]"
         aria-label="Back to pattern list"
       >
-        ← Back
+        <ng-icon name="heroArrowLeftSolid" aria-hidden="true" />
       </button>
-
-      <div class="h-5 w-px bg-gray-200"></div>
 
       <!-- Name: editable in edit mode, read-only otherwise -->
       @if (isEditMode()) {
         <input
           type="text"
-          class="flex-1 text-sm font-semibold text-gray-900 bg-transparent border-0
-                 border-b border-transparent focus:border-indigo-400 focus:outline-none
-                 px-1 py-0.5 min-w-0"
+          class="flex-1 min-w-[8rem] text-sm font-semibold app-text bg-transparent border-0
+                 border-b border-transparent focus:border-[var(--theme-accent)] focus:outline-none
+                 px-1 py-0.5"
           [value]="gridState()?.name ?? ''"
           (input)="onNameChange($event)"
           aria-label="Pattern name"
         />
       } @else {
-        <span class="flex-1 text-sm font-semibold text-gray-900 truncate px-1">
+        <span class="flex-1 min-w-[8rem] text-sm font-semibold app-text truncate px-1">
           {{ gridState()?.name }}
         </span>
       }
@@ -45,192 +42,184 @@
         </div>
       }
 
-      <!-- ⊞ Section grid control — visible in all modes -->
-      @if (sectionGridConfigurable) {
-        <!-- Configurable mode: chip + popover with editable row/col inputs -->
-        <div class="relative shrink-0" (click)="$event.stopPropagation()">
-          <button
-            #sectionChipBtn
-            type="button"
-            (click)="onSectionChipClick()"
-            [attr.aria-expanded]="sectionPopoverOpen()"
-            aria-haspopup="dialog"
-            class="flex items-center gap-1 text-xs font-medium rounded-lg px-3 min-h-[44px]
-                   focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
-            [class]="sectionActive()
-              ? 'text-green-700 bg-green-100 hover:bg-green-200'
-              : 'text-gray-700 bg-gray-100 hover:bg-gray-200'"
-          >
-            ⊞ {{ sectionChipLabel() }}
-          </button>
-
-          @if (sectionPopoverOpen()) {
-            <!-- Popover anchored right-0 to prevent viewport overflow -->
-            <div
-              cdkTrapFocus
-              role="dialog"
-              aria-label="Section grid settings"
-              aria-modal="true"
-              (keydown.escape)="closeSectionPopover()"
-              class="absolute top-full right-0 mt-1 z-20 bg-white border border-gray-200
-                     rounded-xl shadow-lg p-4 w-56"
+      <!-- Tools: their own line on phones, inline from sm up. Hidden while collapsed. -->
+      <div
+        id="editor-tools"
+        class="order-last basis-full sm:order-none sm:basis-auto flex flex-wrap items-center gap-2 pb-1 sm:pb-0"
+        [hidden]="toolbarCollapsed()"
+      >
+        <!-- Section grid control — visible in all modes -->
+        @if (sectionGridConfigurable) {
+          <!-- Configurable mode: chip + popover with editable row/col inputs -->
+          <div class="relative shrink-0" (click)="$event.stopPropagation()">
+            <button
+              #sectionChipBtn
+              type="button"
+              (click)="onSectionChipClick()"
+              [attr.aria-expanded]="sectionPopoverOpen()"
+              aria-haspopup="dialog"
+              class="focus-ring flex items-center gap-1 text-xs font-medium rounded-lg px-3 min-h-[44px]"
+              [class]="sectionActive() ? 'app-highlight-soft app-text-accent' : 'app-button-secondary'"
             >
-              <div class="flex flex-col gap-3">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-semibold text-gray-700">Section Grid</span>
-                  <button
-                    cdkFocusInitial
-                    type="button"
-                    (click)="closeSectionPopover()"
-                    class="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2
-                           focus:ring-indigo-500 rounded p-1 min-h-[44px] min-w-[44px]
-                           flex items-center justify-center"
-                    aria-label="Close section grid settings"
-                  >
-                    ✕
-                  </button>
+              <ng-icon name="heroTableCellsSolid" aria-hidden="true" />
+              {{ sectionChipLabel() }}
+            </button>
+
+            @if (sectionPopoverOpen()) {
+              <!-- Popover anchored right-0 to prevent viewport overflow -->
+              <div
+                cdkTrapFocus
+                role="dialog"
+                aria-label="Section grid settings"
+                aria-modal="true"
+                (keydown.escape)="closeSectionPopover()"
+                class="app-card absolute top-full left-0 sm:left-auto sm:right-0 mt-1 z-20 rounded-xl
+                       shadow-lg p-4 w-56"
+              >
+                <div class="flex flex-col gap-3">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold app-text">Section Grid</span>
+                    <button
+                      cdkFocusInitial
+                      type="button"
+                      (click)="closeSectionPopover()"
+                      class="app-icon-button focus-ring rounded min-h-[44px] min-w-[44px]
+                             flex items-center justify-center"
+                      aria-label="Close section grid settings"
+                    >
+                      <ng-icon name="heroXMarkSolid" aria-hidden="true" />
+                    </button>
+                  </div>
+
+                  <label class="flex flex-col gap-1">
+                    <span class="text-xs app-text-muted">Every _ rows</span>
+                    <input
+                      type="number"
+                      min="0"
+                      class="app-input border rounded px-2 py-2 text-sm w-full min-h-[44px]"
+                      [value]="gridState()?.sectionRowInterval ?? 0"
+                      (change)="onSectionRowIntervalChange($event)"
+                    />
+                  </label>
+
+                  <label class="flex flex-col gap-1">
+                    <span class="text-xs app-text-muted">Every _ cols</span>
+                    <input
+                      type="number"
+                      min="0"
+                      class="app-input border rounded px-2 py-2 text-sm w-full min-h-[44px]"
+                      [value]="gridState()?.sectionColInterval ?? 0"
+                      (change)="onSectionColIntervalChange($event)"
+                    />
+                  </label>
                 </div>
-
-                <label class="flex flex-col gap-1">
-                  <span class="text-xs text-gray-600">Every _ rows</span>
-                  <input
-                    type="number"
-                    min="0"
-                    class="border border-gray-300 rounded px-2 py-2 text-sm w-full
-                           focus:outline-none focus:ring-2 focus:ring-indigo-500
-                           min-h-[44px] disabled:bg-gray-50 disabled:text-gray-400"
-                    [value]="gridState()?.sectionRowInterval ?? 0"
-                    (change)="onSectionRowIntervalChange($event)"
-                  />
-                </label>
-
-                <label class="flex flex-col gap-1">
-                  <span class="text-xs text-gray-600">Every _ cols</span>
-                  <input
-                    type="number"
-                    min="0"
-                    class="border border-gray-300 rounded px-2 py-2 text-sm w-full
-                           focus:outline-none focus:ring-2 focus:ring-indigo-500
-                           min-h-[44px] disabled:bg-gray-50 disabled:text-gray-400"
-                    [value]="gridState()?.sectionColInterval ?? 0"
-                    (change)="onSectionColIntervalChange($event)"
-                  />
-                </label>
               </div>
-            </div>
-          }
-        </div>
-      } @else {
-        <!-- Non-configurable mode: simple on/off toggle using env defaults -->
-        <button
-          type="button"
-          (click)="onSectionToggle()"
-          [attr.aria-pressed]="sectionActive()"
-          aria-label="Toggle section grid overlay"
-          class="flex items-center gap-1 text-xs font-medium rounded-lg px-3 min-h-[44px]
-                 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition shrink-0"
-          [class]="sectionActive()
-            ? 'text-green-700 bg-green-100 hover:bg-green-200'
-            : 'text-gray-700 bg-gray-100 hover:bg-gray-200'"
-        >
-          ⊞ Section
-        </button>
-      }
+            }
+          </div>
+        } @else {
+          <!-- Non-configurable mode: simple on/off toggle using env defaults -->
+          <button
+            type="button"
+            (click)="onSectionToggle()"
+            [attr.aria-pressed]="sectionActive()"
+            aria-label="Toggle section grid overlay"
+            class="focus-ring flex items-center gap-1 text-xs font-medium rounded-lg px-3 min-h-[44px] shrink-0"
+            [class]="sectionActive() ? 'app-highlight-soft app-text-accent' : 'app-button-secondary'"
+          >
+            <ng-icon name="heroTableCellsSolid" aria-hidden="true" />
+            Section
+          </button>
+        }
 
-      <!-- Mode-specific controls -->
-      @if (isEditMode()) {
-        <div class="flex items-center gap-2 shrink-0">
-          @if (saveService.saveStatus() === 'saving') {
-            <span class="text-xs text-gray-500">Saving…</span>
-          } @else if (saveService.saveStatus() === 'saved') {
-            <span class="text-xs text-green-700">Saved ✓</span>
-          } @else if (saveService.saveStatus() === 'error') {
-            <span class="text-xs text-red-600">Save failed ⚠</span>
-          } @else if (saveService.isDirty()) {
-            <span
-              role="img"
-              class="inline-block w-2 h-2 rounded-full bg-amber-700"
-              aria-label="Unsaved changes"></span>
-          }
+        <!-- Mode-specific controls -->
+        @if (isEditMode()) {
           <button
             type="button"
             (click)="onSave()"
-            class="rounded-lg bg-indigo-600 text-white text-xs font-medium px-3 py-1.5
-                   hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500
-                   focus:ring-offset-1 transition"
+            class="app-button-primary focus-ring rounded-lg text-xs font-semibold px-3 min-h-[44px]"
           >
             Save
           </button>
-        </div>
-
-      } @else if (isProgressMode()) {
-        <span class="text-xs text-white bg-teal-700 rounded px-2 py-0.5 shrink-0">
-          Track Progress
-        </span>
-
-        <div class="flex items-center gap-2 shrink-0">
-          @if (progressSaveService.saveStatus() === 'saving') {
-            <span class="text-xs text-gray-500">Saving…</span>
-          } @else if (progressSaveService.saveStatus() === 'saved') {
-            <span class="text-xs text-green-700">Saved ✓</span>
-          } @else if (progressSaveService.saveStatus() === 'error') {
-            <span class="text-xs text-red-600">Save failed ⚠</span>
-          } @else if (progressSaveService.isDirty()) {
-            <span
-              role="img"
-              class="inline-block w-2 h-2 rounded-full bg-amber-700"
-              aria-label="Unsaved progress changes"></span>
-          }
+        } @else if (isProgressMode()) {
+          <span class="app-tag-info text-xs font-medium rounded px-2 py-0.5 shrink-0">
+            Track Progress
+          </span>
           <button
             type="button"
             (click)="onProgressSave()"
-            class="rounded-lg bg-teal-700 text-white text-xs font-medium px-3 py-1.5
-                   hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-600
-                   focus:ring-offset-1 transition"
+            class="app-button-primary focus-ring rounded-lg text-xs font-semibold px-3 min-h-[44px]"
           >
             Save
           </button>
           <button
             type="button"
             (click)="confirmingClearProgress.set(true)"
-            class="rounded-lg border border-red-200 bg-red-50 text-red-700 text-xs font-medium
-                   px-3 py-1.5 hover:bg-red-100 focus:outline-none focus:ring-2
-                   focus:ring-red-500 transition"
+            class="app-button-danger-soft focus-ring rounded-lg text-xs font-medium px-3 min-h-[44px]"
           >
             Clear All
           </button>
-        </div>
+        } @else {
+          <span class="app-surface-strong app-text text-xs rounded px-2 py-0.5 shrink-0">
+            Viewing — Read Only
+          </span>
+        }
+      </div>
 
-      } @else {
-        <span class="text-xs text-gray-700 bg-gray-100 rounded px-2 py-0.5 shrink-0">
-          Viewing — Read Only
-        </span>
+      <!-- Save status: stays visible while the tools are collapsed -->
+      @if (activeSave(); as save) {
+        <div class="flex items-center gap-1 shrink-0 text-xs">
+          @if (save.saveStatus() === 'saving') {
+            <span class="app-text-muted">Saving…</span>
+          } @else if (save.saveStatus() === 'saved') {
+            <ng-icon name="heroCheckSolid" class="app-text-success" aria-hidden="true" />
+            <span class="app-text-muted">Saved</span>
+          } @else if (save.saveStatus() === 'error') {
+            <ng-icon name="heroExclamationTriangleSolid" class="app-text-danger" aria-hidden="true" />
+            <span class="app-text-danger">Save failed</span>
+          } @else if (save.isDirty()) {
+            <span
+              role="img"
+              class="inline-block w-2 h-2 rounded-full bg-[var(--theme-warning)]"
+              [attr.aria-label]="isProgressMode() ? 'Unsaved progress changes' : 'Unsaved changes'"></span>
+          }
+        </div>
       }
+
+      <button
+        type="button"
+        (click)="toggleToolbar()"
+        class="app-icon-button focus-ring flex items-center justify-center rounded-lg min-h-[44px] min-w-[44px]"
+        aria-controls="editor-tools"
+        [attr.aria-expanded]="!toolbarCollapsed()"
+        [attr.aria-label]="toolbarCollapsed() ? 'Show editor tools' : 'Hide editor tools'"
+      >
+        <ng-icon [name]="toolbarCollapsed() ? 'heroChevronDownSolid' : 'heroChevronUpSolid'" aria-hidden="true" />
+      </button>
     </div>
 
     <!-- Stale-progress warning banner -->
     @if (isProgressMode() && isProgressStale() && !staleBannerDismissed()) {
       <div
         role="alert"
-        class="flex items-center gap-2 px-4 py-2 bg-amber-50 border-t border-amber-200 text-amber-800 text-xs"
+        class="flex items-center gap-2 px-4 py-2 app-warning-soft border-t app-border-subtle app-text text-xs"
       >
+        <ng-icon name="heroExclamationTriangleSolid" class="app-text-warning shrink-0" aria-hidden="true" />
         <span class="flex-1">
-          ⚠ Pattern was edited after your last progress save. Row or cell positions may have shifted.
+          Pattern was edited after your last progress save. Row or cell positions may have shifted.
         </span>
         <button
           type="button"
           (click)="staleBannerDismissed.set(true)"
-          class="shrink-0 text-amber-700 hover:text-amber-900 focus:outline-none
-                 focus:ring-2 focus:ring-amber-500 rounded p-0.5 transition"
+          class="app-icon-button focus-ring shrink-0 rounded flex items-center justify-center min-h-[32px] min-w-[32px]"
           aria-label="Dismiss stale progress warning"
         >
-          ✕
+          <ng-icon name="heroXMarkSolid" aria-hidden="true" />
         </button>
       </div>
     }
   </header>
 
-  <main class="flex-1 flex flex-col min-h-0">
+  <div class="flex-1 flex flex-col min-h-0">
     <!-- sr-only h1 announces page context to screen readers -->
     <h1 class="sr-only">
       @if (isProgressMode()) {
@@ -241,17 +230,17 @@
     </h1>
 
     @if (loading()) {
-      <div class="flex-1 flex items-center justify-center text-gray-500 text-sm">
+      <div class="flex-1 flex items-center justify-center app-text-muted text-sm">
         Loading pattern…
       </div>
     } @else if (gridState(); as state) {
       <!-- Scrollable grid area -->
       <div
-        class="flex-1 overflow-auto touch-pan-x touch-pan-y pb-16"
+        class="flex-1 overflow-auto touch-pan-x touch-pan-y pb-16 bg-[var(--theme-bg)]"
         (zoomchange)="onZoomChange($event)"
       >
         <!-- Col headers (sticky top) -->
-        <div class="sticky top-0 z-10 bg-white">
+        <div class="sticky top-0 z-10 w-max app-surface">
           <app-grid-col-headers
             [cols]="state.cols"
             [cellSize]="cellSize()"
@@ -263,9 +252,9 @@
         </div>
 
         <!-- Row headers + canvas side-by-side -->
-        <div class="flex">
+        <div class="flex w-max">
           <!-- Row headers (sticky left) -->
-          <div class="sticky left-0 z-10 bg-white">
+          <div class="sticky left-0 z-10 app-surface">
             <app-grid-row-headers
               [rows]="state.rows"
               [cellSize]="cellSize()"
@@ -292,7 +281,7 @@
         </div>
       </div>
     }
-  </main>
+  </div>
 
 </div>
 
@@ -301,34 +290,32 @@
   <div
     cdkTrapFocus
     cdkTrapFocusAutoCapture
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-[var(--theme-overlay)]"
     role="dialog"
     aria-modal="true"
     aria-labelledby="clear-progress-dialog-title"
   >
-    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4">
+    <div class="app-card rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4">
       <h3
         id="clear-progress-dialog-title"
-        class="text-base font-semibold text-gray-900 mb-2"
+        class="text-base font-semibold app-text mb-2"
       >
         Clear all progress for "{{ gridState()?.name }}"?
       </h3>
-      <p class="text-sm text-gray-600 mb-6">This cannot be undone.</p>
+      <p class="text-sm app-text-muted mb-6">This cannot be undone.</p>
       <div class="flex gap-3 justify-end">
         <button
           cdkFocusInitial
           type="button"
           (click)="onClearProgressCancel()"
-          class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700
-                 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
+          class="app-button-secondary focus-ring rounded-lg px-4 py-2 min-h-[44px] text-sm font-medium"
         >
           Cancel
         </button>
         <button
           type="button"
           (click)="onClearProgressConfirm()"
-          class="rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-medium
-                 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition"
+          class="app-button-danger focus-ring rounded-lg px-4 py-2 min-h-[44px] text-sm font-medium"
         >
           Clear
         </button>

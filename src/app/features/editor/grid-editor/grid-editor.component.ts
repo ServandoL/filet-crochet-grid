@@ -26,13 +26,15 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {catchError, debounceTime, filter, forkJoin, merge, of} from 'rxjs';
 import {HouseholdChange, HouseholdEvents} from '@home/ui/realtime';
 import {A11yModule} from '@angular/cdk/a11y';
+import {NgIcon} from '@ng-icons/core';
 import {environment} from '../../../../environments/environment';
 
 const DEFAULT_CELL_SIZE = 24;
+const TOOLBAR_COLLAPSED_KEY = 'filet-crochet.editor-toolbar-collapsed';
 
 @Component({
   selector: 'app-grid-editor',
-  imports: [GridCanvasComponent, GridRowHeadersComponent, GridColHeadersComponent, A11yModule],
+  imports: [GridCanvasComponent, GridRowHeadersComponent, GridColHeadersComponent, A11yModule, NgIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './grid-editor.component.html',
   host: {
@@ -70,6 +72,8 @@ export class GridEditorComponent implements OnInit {
   readonly staleBannerDismissed = signal(false);
   readonly confirmingClearProgress = signal(false);
   readonly sectionPopoverOpen = signal(false);
+  /** Hides the toolbar's tools, leaving back, name, save status and the toggle. Saved on this device. */
+  readonly toolbarCollapsed = signal(readToolbarCollapsed());
 
   /** ViewChild ref for the section chip button — used to return focus on popover dismiss. */
   readonly sectionChipBtnRef = viewChild<ElementRef<HTMLButtonElement>>('sectionChipBtn');
@@ -80,13 +84,18 @@ export class GridEditorComponent implements OnInit {
   readonly isEditMode = computed(() => this.mode() === 'edit');
   readonly isProgressMode = computed(() => this.mode() === 'progress');
 
+  /** The save pipeline whose status the toolbar shows; none while viewing. */
+  readonly activeSave = computed(() =>
+    this.isEditMode() ? this.saveService : this.isProgressMode() ? this.progressSaveService : null,
+  );
+
   readonly isProgressStale = computed(() => {
     const ps = this.progressState();
     if (!ps || !ps.progressUpdatedAt) return false;
     return ps.patternUpdatedAt > ps.progressUpdatedAt;
   });
 
-  /** Chip label — `⊞ R × C` or `⊞ Off` shown in the toolbar (configurable mode only). */
+  /** Chip label — `R × C` or `Off` shown in the toolbar (configurable mode only). */
   readonly sectionChipLabel = computed(() => {
     const state = this.gridState();
     if (!state) return 'Off';
@@ -252,6 +261,16 @@ export class GridEditorComponent implements OnInit {
     void this.router.navigate(['/patterns']);
   }
 
+  toggleToolbar(): void {
+    this.toolbarCollapsed.update((collapsed) => !collapsed);
+    if (this.toolbarCollapsed()) this.sectionPopoverOpen.set(false);
+    try {
+      localStorage.setItem(TOOLBAR_COLLAPSED_KEY, String(this.toolbarCollapsed()));
+    } catch {
+      // Storage can be missing or blocked; the choice still applies until the page reloads.
+    }
+  }
+
   onZoomChange(event: Event): void {
     const zoom = (event as CustomEvent<number>).detail;
     this.zoomLevel.set(zoom);
@@ -360,5 +379,13 @@ export class GridEditorComponent implements OnInit {
 
   onClearProgressCancel(): void {
     this.confirmingClearProgress.set(false);
+  }
+}
+
+function readToolbarCollapsed(): boolean {
+  try {
+    return localStorage.getItem(TOOLBAR_COLLAPSED_KEY) === 'true';
+  } catch {
+    return false;
   }
 }
