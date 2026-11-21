@@ -1,63 +1,59 @@
-<div class="min-h-screen bg-gray-50">
-  <!-- Header -->
-  <header class="bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between">
-    <h1 class="text-xl font-semibold text-gray-900">🧶 My Patterns</h1>
+<div class="max-w-4xl mx-auto px-4 py-6">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+    <h1 class="text-2xl font-bold app-text">My Patterns</h1>
     <div class="flex items-center gap-2">
       <button
         type="button"
         (click)="router.navigate(['/patterns/new'])"
-        class="rounded-lg bg-indigo-600 text-white px-4 py-2 text-sm font-medium
-               hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500
-               focus:ring-offset-2 transition"
+        class="app-button-primary focus-ring inline-flex items-center gap-1.5 rounded-lg px-4 min-h-[44px]
+               text-sm font-semibold"
       >
-        + New Pattern
+        <ng-icon name="heroPlusSolid" aria-hidden="true" />
+        New pattern
       </button>
       @if (env.enableLogIn) {
         <button
           type="button"
           (click)="onLogout()"
-          class="rounded-lg border border-gray-300 text-gray-600 px-4 py-2 text-sm font-medium
-               hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400
-               focus:ring-offset-2 transition"
+          class="app-button-secondary focus-ring rounded-lg px-4 min-h-[44px] text-sm font-medium"
           aria-label="Log out"
         >
           Log Out
         </button>
       }
     </div>
-  </header>
+  </div>
 
-  <!-- Content -->
-  <main class="max-w-4xl mx-auto px-4 py-8">
-    @if (loading()) {
-      <p class="text-center text-gray-500 text-sm mt-16">Loading…</p>
-    } @else if (visiblePatterns().length === 0) {
-      <div class="text-center mt-24">
-        <p class="text-5xl mb-4">🧶</p>
-        <p class="text-gray-600 font-medium">No patterns yet.</p>
-        <p class="text-gray-600 text-sm mt-1">Create your first filet crochet pattern!</p>
-        <button
-          type="button"
-          (click)="router.navigate(['/patterns/new'])"
-          class="mt-6 rounded-lg bg-indigo-600 text-white px-5 py-2.5 text-sm font-medium
-                 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500
-                 focus:ring-offset-2 transition"
-        >
-          + New Pattern
-        </button>
-      </div>
-    } @else {
-      <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" role="list">
-        @for (pattern of visiblePatterns(); track pattern._id) {
-          <li>
-            <app-pattern-card
-              [pattern]="pattern"
-              (deleted)="onDeleted($event)"
-            />
-          </li>
-        }
-      </ul>
-    }
-  </main>
+  @if (loading()) {
+    <div class="flex justify-center mt-16" role="status">
+      <span class="app-spinner inline-block h-8 w-8 rounded-full border-4 animate-spin" aria-hidden="true"></span>
+      <span class="sr-only">Loading patterns</span>
+    </div>
+  } @else if (visiblePatterns().length === 0) {
+    <div class="app-card rounded-2xl text-center px-6 py-12 mt-8">
+      <ng-icon name="heroSquares2x2Solid" size="3rem" class="app-text-accent" aria-hidden="true" />
+      <p class="app-text font-medium mt-3">No patterns yet.</p>
+      <p class="app-text-muted text-sm mt-1">Create your first filet crochet pattern!</p>
+      <button
+        type="button"
+        (click)="router.navigate(['/patterns/new'])"
+        class="app-button-primary focus-ring inline-flex items-center gap-1.5 mt-6 rounded-lg px-5 min-h-[44px]
+               text-sm font-semibold"
+      >
+        <ng-icon name="heroPlusSolid" aria-hidden="true" />
+        New pattern
+      </button>
+    </div>
+  } @else {
+    <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" role="list">
+      @for (pattern of visiblePatterns(); track pattern._id) {
+        <li>
+          <app-pattern-card
+            [pattern]="pattern"
+            (deleted)="onDeleted($event)"
+          />
+        </li>
+      }
+    </ul>
+  }
 </div>
-

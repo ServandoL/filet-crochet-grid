@@ -10,10 +10,11 @@ import {switchMap} from 'rxjs/operators';
 import {HouseholdEvents} from '@home/ui/realtime';
 import {AuthService} from '../../../core/services/auth.service';
 import {environment} from '../../../../environments/environment';
+import {NgIcon} from '@ng-icons/core';
 
 @Component({
   selector: 'app-pattern-list',
-  imports: [PatternCardComponent],
+  imports: [PatternCardComponent, NgIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './pattern-list.component.html',
 })
