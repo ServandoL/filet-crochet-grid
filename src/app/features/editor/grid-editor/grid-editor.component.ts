@@ -36,6 +36,8 @@ const DEFAULT_CELL_SIZE = 24;
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './grid-editor.component.html',
   host: {
+    // The route fills the shell (shellLayout: 'fill'); the grid area below scrolls.
+    class: 'flex flex-col flex-1 min-h-0',
     '(document:click)': 'onDocumentClick()',
   },
 })

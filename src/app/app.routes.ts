@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { SETTINGS_ROUTE, ShellRouteData } from '@home/ui';
 import { authGuard } from './core/guards/auth.guard';
 import { loginRedirectGuard } from './core/guards/login-redirect.guard';
 import { LoginComponent } from './features/auth/login/login.component';
@@ -30,11 +31,14 @@ export const routes: Routes = [
     path: 'patterns/:id',
     canActivate: [authGuard],
     canDeactivate: [unsavedChangesGuard],
+    // The grid scrolls itself under sticky row/column numbers; collapse the shell to give it room.
+    data: { shellLayout: 'fill', shellCollapsed: true } satisfies ShellRouteData,
     loadComponent: () =>
       import('./features/editor/grid-editor/grid-editor.component').then(
         (m) => m.GridEditorComponent,
       ),
   },
+  SETTINGS_ROUTE,
   { path: '', redirectTo: 'patterns', pathMatch: 'full' },
   { path: '**', redirectTo: 'patterns' },
 ];

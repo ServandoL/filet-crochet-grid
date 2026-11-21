@@ -1,31 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import "tailwindcss";
-/* @home/ui's colors and .app-* classes, for the household picker and the signed-out banner. The
-   rules below come after it, so this app keeps its own font. */
+/* @home/ui's colors, font and .app-* classes. */
 @import "@home/ui/theme.css";
 /* Let Tailwind see the class names used in @home/ui's templates. */
 @source "../node_modules/@home/ui";
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
 body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
-    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-app-root {
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
 }
