@@ -13,20 +13,21 @@ and track your progress stitch by stitch as you work it.
 ## Architecture
 - **Frontend:** Angular 22, TypeScript, standalone components, feature-based
   structure (`core/` services and guards, `features/` editor and patterns)
-- **Backend (in this repo):** Koa 3 + TypeScript (ESM), MongoDB driver,
+- **Backend (production):** the Spring Boot API in
+  [filet-crochet-sb](https://github.com/ServandoL/filet-crochet-sb)
+- **Backend (in this repo, older):** Koa 3 + TypeScript (ESM), MongoDB driver,
   Zod schemas for validation, Winston logging, rate limiting
-- **Backend (Spring Boot version):** the same API is also implemented in Java —
-  see [filet-crochet-sb](https://github.com/ServandoL/filet-crochet-sb)
-- **Deployment:** multi-stage Docker build, nginx serves the SPA and proxies
-  `/api`, docker-compose wires frontend + backend
+- **Deployment:** on the home server, served at `/filet-crochet/` and deployed from the
+  `home-server` repo (`make filet-crochet-grid`, or `make deploy-filet-crochet` to include the API).
+  The `Dockerfile`, `docker-compose.yml` and `nginx/` here are the older standalone setup.
 
 ## Households and the API
 On the home server every pattern belongs to a household, shared with the other home apps and managed
 in Home (`/household`). The app is wrapped in `HouseholdGateComponent` from `@home/ui/household`: it
 loads `/household-api/api/v1/me`, picks your household (or asks, if you're in several), and only
-then renders the routes. `householdInterceptor` adds `X-Household-Id` to every crochet call. Only the
-household entry point and `theme.css` (for the picker) are used, not the `@home/ui` shell, so the app
-keeps its own layout.
+then renders the `@home/ui` shell around the routes, like the other home apps. `householdInterceptor`
+adds `X-Household-Id` to every crochet call. Styling comes from `@home/ui/theme.css`, and
+`@home/ui/realtime` streams other devices' changes so the pattern list and editor refetch.
 
 `ng serve` proxies `/filet-crochet-api` to the Spring Boot API on `localhost:9010` and
 `/household-api` to household-api on `localhost:9020` (`proxy.conf.json`), as nginx does on the home
@@ -41,11 +42,11 @@ shipped changes — start there to see how a feature evolved.
 ```bash
 npm install
 npm start            # Angular dev server on http://localhost:4200
-# backend
-cd backend && npm install && npm run build && npm start
-# or the full stack
-docker compose up --build
 ```
+
+Run the Spring Boot API and household-api alongside it (see the proxy ports above). The older Koa
+backend still runs with `cd backend && npm install && npm run build && npm start`, but production
+doesn't use it. Avoid `docker compose up`: the standalone stack binds ports 80 and 443.
 
 ## Tests
 Angular unit specs cover the grid canvas, grid editor, and grid utilities
