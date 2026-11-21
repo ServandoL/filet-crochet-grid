@@ -11,7 +11,8 @@ import {
   heroTableCellsSolid,
   heroXMarkSolid,
 } from '@ng-icons/heroicons/solid';
-import { provideHomeTheme, SETTINGS_NAV_ROUTE } from '@home/ui';
+import { HELP_NAV_ROUTE, provideHomeTheme, SETTINGS_NAV_ROUTE } from '@home/ui';
+import { FILET_CROCHET_HELP } from './help';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
@@ -45,7 +46,9 @@ export const appConfig: ApplicationConfig = {
       routes: [
         { name: 'Patterns', url: '/patterns', icon: { name: 'heroSquares2x2Solid' } },
         SETTINGS_NAV_ROUTE,
+        HELP_NAV_ROUTE,
       ],
+      help: FILET_CROCHET_HELP,
     }),
   ],
 };

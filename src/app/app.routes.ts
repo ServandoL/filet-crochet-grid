@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { SETTINGS_ROUTE, ShellRouteData } from '@home/ui';
+import { HELP_ROUTE, SETTINGS_ROUTE, ShellRouteData } from '@home/ui';
 import { authGuard } from './core/guards/auth.guard';
 import { loginRedirectGuard } from './core/guards/login-redirect.guard';
 import { LoginComponent } from './features/auth/login/login.component';
@@ -39,6 +39,7 @@ export const routes: Routes = [
       ),
   },
   SETTINGS_ROUTE,
+  HELP_ROUTE,
   { path: '', redirectTo: 'patterns', pathMatch: 'full' },
   { path: '**', redirectTo: 'patterns' },
 ];
