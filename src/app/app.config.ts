@@ -40,10 +40,8 @@ export const appConfig: ApplicationConfig = {
       heroTableCellsSolid,
       heroXMarkSolid,
     }),
-    // The editor route collapses the shell to give the grid the screen (see app.routes.ts).
     provideHomeTheme({
       appName: 'Filet Crochet',
-      collapsibleShell: true,
       routes: [
         { name: 'Patterns', url: '/patterns', icon: { name: 'heroSquares2x2Solid' } },
         SETTINGS_NAV_ROUTE,
