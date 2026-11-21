@@ -15,8 +15,9 @@ every API) lives in `~/WebstormProjects/home-server`; read its `README.md` for t
   the API. The `Dockerfile`, `docker-compose.yml`, `nginx/` and `npm run docker:*` scripts here are
   an older standalone setup that binds ports 80/443; don't run them.
 - `@home/ui` is a packed tarball from `~/WebstormProjects/home-ui-theme`, pinned in `package.json`
-  as `file:…/builds/home-ui-X.Y.Z.tgz`. This app uses only its household entry point and
-  `theme.css`, not the shell. A fix to a shared component belongs in home-ui-theme.
+  as `file:…/builds/home-ui-X.Y.Z.tgz`. The app uses its shell, household gate and realtime
+  updates (the README's "not the shell" is out of date). A fix to a shared component belongs in
+  home-ui-theme.
 
 ## Working here
 
