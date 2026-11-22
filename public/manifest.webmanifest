@@ -1,0 +1,23 @@
+{
+  "name": "Filet Crochet",
+  "short_name": "Crochet",
+  "start_url": ".",
+  "scope": ".",
+  "display": "browser",
+  "background_color": "#be185d",
+  "theme_color": "#be185d",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
