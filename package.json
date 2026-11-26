@@ -33,7 +33,7 @@
     "@angular/forms": "^22.3.0",
     "@angular/platform-browser": "^22.3.0",
     "@angular/router": "^22.3.0",
-    "@home/ui": "file:../home-ui-theme/home/ui-app/builds/home-ui-3.4.0.tgz",
+    "@home/ui": "file:../home-ui-theme/home/ui-app/builds/home-ui-3.4.1.tgz",
     "@ng-icons/core": "^36.1.0",
     "@ng-icons/heroicons": "^36.1.0",
     "@ng-icons/phosphor-icons": "^36.1.0",
